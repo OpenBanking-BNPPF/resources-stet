@@ -8,7 +8,9 @@ The file <postman-collection.json> should be imported to Postman Collections
 >Learn more about Postman Collections [here](https://learning.postman.com/docs/postman/collections/intro-to-collections/).
 
 ## Postman Environment
-In order to have Postman variables filled in with your data exported from Api Console The file <postman-environment.json> should be imported to Postman Environments
+The file <postman-collection.json> should be imported to Postman Collections
+In order to get The file <postman-environment.json> filled in with your test data please use "Process Postman Environment" action from the Api Console
+>Sandbox API Console [here](https://developer.bnpparibasfortis.com/api-console).
 >Learn more about Postman Environment [here](https://learning.postman.com/docs/postman/variables-and-environments/variables/).
 
 ## Postman Certificates
