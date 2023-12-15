@@ -1,0 +1,3652 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "3.2",
+    "title": "psd2",
+    "description": "This API intends to provide an interface between\n- Account Servicing Payment Service Providers (ASPSP)\n- Third Party (Payment Service) Providers (TPP)\n\nBased on PSD2 STET version: 1.4.0.47\n\nTPP may act with different roles as described below:\n- Account Information Service Providers (AISP)\n- Payment Initiation Service Providers (PISP)\n- Card Based Payment Instrument Issuers (CBPII)\n\nExposed functionalities to the TPP:\n  - AISP\n    - GET /accounts\n    - GET /accounts/{accountResourceId}/balances\n    - GET /accounts/{accountResourceId}/transactions\n    - GET /accounts/{accountResourceId}/transactions/{transactionResourceId}\n\n\n- PISP\n    - POST /payment-requests\n    - GET /payment-requests/{paymentRequestResourceId}\n    - PUT /payment-requests/{paymentRequestResourceId}\n    - POST /file-payment-requests\n    - GET /file-payment-requests/{paymentRequestResourceId}\n\n- CBPI\n    - POST /funds-confirmations\n\n\nThe Payment Service User (PSU) is the owner of the accounts held by the ASPSP and gives accreditations to the TPP in order to access his accounts information or initiates payment from these accounts\n\nThe API is designed on a REST model using JSON structures.\n\nThe Richardson Maturity Model is applied on level three using HAL HYPERMEDIA links\n",
+    "contact": {
+      "name": "BNPPF Dev Portal",
+      "url": "https://developer.bnpparibasfortis.com/"
+    }
+  },
+  "paths": {
+    "/accounts": {
+      "get": {
+        "operationId": "accountsGet",
+        "tags": [
+          "AISP"
+        ],
+        "summary": "Retrieval of the PSU accounts (AISP)",
+        "description": "<h3>Description</h3>\n <p> Provide the possibility for an AISP to retrieve all payment accounts for which the PSU granted his consent.  \n  Each account is returned with a resourceId aiming to access to the transaction and balance information. </br></br>\n  If there are no accounts, a 200 HTTP status code is returned along the empty list of accounts.\n</p><h3>Prerequisites</h3>\n  <ul>\n    <li><p>The TPP has been registered by the Registration Authority for the AISP role.</p></li>\n    <li><p>The TPP and the PSU have a contract (PSU granted his consent to the TPP)  that has been enrolled by the ASPSP.</p></li>\n    <li><p>The TPP and the ASPSP have successfully processed a mutual check and authentication.</p></li>\n    <li><p>The TPP has presented its OAUTH2 \"Authorization Code\" access token.</p></li>\n  </ul>\n<p>The following table indicates how to use the different fields :</p>\n<table border=\"1\" >\n  <tbody>\n  <tr>\n  <td colspan=\"2\"><b>Response</td>\n  </tr>\n  <tr>\n  \n  <td>\n  <p>accounts>resourceId</p>\n  </td>\n  <td >\n  <p>Mandatory<br /><br /> The identifier of the account resource to be used when retrieving the transaction or balance information from a dedicated account (concatenation of the IBAN and account currency).</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>bicFi</p>\n  </td>\n  <td>\n  <p>Mandatory<br /><br />The Business identification code (BIC)</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>accountId</p>\n  </td>\n  <td>\n  <p>Mandatory<br /><br /> The identifier of the account. Only IBAN is used</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>details</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>linkedAccount</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>usage</p>\n  </td>\n  <td>\n  <p>Mandatory</p>\n <p>The usage of the account:<br></p><ul><li><p>PRIV: private personal account</p></li><li><p>ORGA: professional account</p></li></ul> </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>cashAccountType</p>\n  </td>\n  <td>\n  <p>Mandatory</p>\n <p>The type of the account. Only CACC (Cash account)</p>  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>product</p>\n  </td>\n  <td>\n  <p>Optional</p>\n <p>The product Name of the Bank for the account</p> </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accounts>currency</p>\n  </td>\n  <td>\n  <p>Mandatory<br /><br />The currency of the account.</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>accounts>balances</p>\n  </td>\n  <td >\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>accounts>psuStatus</p>\n  </td>\n  <td>\n  <p>Optional (Only applicable for Easy Banking users)<br /><br />The relationship between the PSU and the account.<br /><br />Possible values :<br /> - Holder<br /> - Mandate<br /> - Legal representative</p>\n  </td>\n  </tr>\n <tr>\n  <td>\n  <p>accounts>_links<br /> <br />  </p>\n  </td>\n  <td>\n  <p>Mandatory<br /> <br /> The links to be used for further navigation when browsing Account Information. Available links :</p>\n<ul><li><p>transactions: link to the transactions of the accounts</p></li><li><p>balances: link to the balances of the account</p></li></ul>  </td>\n  </tr><tr>\n  <td >\n  <p>connectedPsu</p>\n  </td>\n  <td >\n  <p>Not available</p>\n  </td>\n  </tr>\n <tr>\n  <td>\n  <p>_links<br /> <br />  </p>\n  </td>\n  <td>\n  <p>Mandatory<br /> <br /> The links to be used for further navigation when browsing Account Information. Available link :</p>\n<ul><li><p>self: link to the list of all accounts</p></li></ul>  </td>\n  </tr>\n  </tbody>\n  </table>\n<h4>Legend :</h4>\n<ul>  \n  <li>Available : field optional in the contract and always available in the response</li>\n <li> Not available: field optional in the contract and not available in the response</li>\n</ul>\n",
+        "security": [
+          {
+            "accessCode": [
+              "aisp"
+            ]
+          },
+          {
+            "resourceOwnerIdentification": [
+              "aisp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ASPSP return a PSU context \n- listing the accounts that have been made available to the AISP by the PSU and, \n- for each of these accounts, the further transactions that have been enabled by the PSU through HYPERMEDIA links.\n",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/hal+json; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalAccounts"
+                }
+              }
+            }
+          },
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/accounts/{accountResourceId}/balances": {
+      "get": {
+        "operationId": "accountsBalancesGet",
+        "description": "<h3>Description</h3>\n<p>Provide the possibility for an AISP to retrieve balance information for a given PSU account that is specified by the AISP through the resourceId identifying the account.</p> <p>Available balances :</br></br></p> <ul><li><p>Closing balance, corresponds to the booking balance at the end of the booking day</p></li><li><p>Operational balance, corresponds to the real time booking balance</p></li><li><p>Available balance, corresponds to the real time booking balance minus pending reservations (Only available for retail customers)</p></li></ul> <h3>Prerequisites</h3>\n<ul> <li><p>The TPP has been registered by the Registration Authority for the AISP role.</p></li> <li><p>The TPP and the PSU have a contract (PSU granted his consent to the TPP) that has been enrolled by the ASPSP. </p></li> <li><p>The TPP and the ASPSP have successfully processed a mutual check and authentication. </p></li> <li><p>The TPP has presented its OAUTH2 “Authorization Code”access token. </p></li> <li><p>The TPP has previously retrieved the list of available accounts for the PSU. </p></li> </ul>\n<p>The following table indicates how to use the different fields :</p> <table border=\"1\"> <tbody> <tr> <td colspan=\"2\"> <p><b>Request</b></p> </td> </tr> <tr> <td> <p>resourceId</p> </td> <td> <p>Mandatory<br /><br /> The identifier of the account resource (Concatenation of the IBAN and account currency)<br /> <br />Value should be retrieved from the list of accounts</p><br /> </td> </tr> <tr> <td colspan=\"2\"> <p><b>Response</b></p> </td> </tr> <tr> <td> <p>balance>Name</p> </td> <td width=\"655\"> <p>Mandatory<br /><br />The name of the balances :</p> <ul><li><p>Closing balance</p></li><li><p>Operational balance</p></li><li><p>Available balance</p></li></ul></td> </tr> <tr> <td> <p>balance>balanceAmount</p> </td> <td> <p>Mandatory<br /><br />The amount of the balance</p> </td> </tr> <tr> <td> <p>balance>balanceType</p> </td> <td> <p>Mandatory.<br /> <br />The type of balances :\n  <ul><li><p>CLBD : Closing balance</p></li><li><p>OTHR : Operational balance</p></li><li><p>ITAV : Available balance</p></li></ul>\n\n</td> </tr> <tr> <td> <p>balance>lastChangeDateTime</p> </td> <td> <p>Not available</p> </td> </tr> <tr> <td> <p>balance>referenceDate</p> </td> <td> <p>Mandatory <br /><br />The reference date for the balance</p> </td> </tr> <tr> <td> <p>lbalance>lastCommittedTransaction</p> </td> <td> <p>Not available</p> </td> </tr> <tr> <td> <p>_links</p> </td> <td> <p>Mandatory<br/><br/>The links to be used for further navigation when browsing Account Information. Available links :</p><ul><li><p>self: link to the balances of the account</p></li><li><p>transactions: link to the transactions of the account</p></li><li><p>parent-list: link to the list of all accounts</p></li></ul> </td> </tr> </tbody> </table> <h4>Legend :</h4> <ul> <li> Available':' field optional in the contract and always available in the response</li> <li> Not available':' field optional in the contract and not available in the response</li> </ul> summary: Retrieval of an account balances report (AISP)",
+        "tags": [
+          "AISP"
+        ],
+        "security": [
+          {
+            "accessCode": [
+              "aisp"
+            ]
+          },
+          {
+            "resourceOwnerIdentification": [
+              "aisp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/AccountResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ASPSP answers with a list of account balances",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/hal+json; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalBalances"
+                }
+              }
+            }
+          },
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/accounts/{accountResourceId}/transactions": {
+      "get": {
+        "operationId": "accountsTransactionsGet",
+        "description": "<h3>Description</h3>\n<p>Provide the possibility for an AISP to retrieve transaction information for a given PSU account that is specified by the AISP through the resourceId identifying the account. </br></br>\n  Following types of transaction are in scope : Booked, Future, Pending, Refused, Reserved </br>\n  \n  The request may use some filter parameter in order to restrict the query on a given imputation date range. Please note that :</p>\n<ul>\n  <li><p>4 years of transactions history is available for Easy Banking Users</p></li>\n   <li><p>Complete transactions history is available for Easy Banking Business Users</p></li>\n</ul>\n<p>The result may be subject to pagination (i.e. retrieving a partial result in case of having too many results) through a set of pages by the ASPSP. Thereafter, the AISP may ask for the next page of results.</br></br>\nMaximum of 100 transactions is returned per page.</br></br>\n  If there is no transaction returned. Then 200 HTTP error code is returned with empty response body.</br></p>\n<h3>Prerequisites</h3>\n  <ul>\n    <li><p>The TPP has been registered by the Registration Authority for the AISP role.</p></li>\n    <li><p>The TPP and the PSU have a contract (PSU granted his consent to the TPP) that has been enrolled by the ASPSP.</p></li>\n    <li><p>The TPP and the ASPSP have successfully processed a mutual check and authentication.</p></li>\n    <li><p>The TPP has presented its OAUTH2 “Authorization Code”access token.</p></li>\n    <li><p>The TPP has previously retrieved the list of available accounts for the PSU.</p></li>\n  </ul>\n<p>The following table indicates how to use the different fields :</p>\n<table border=\"1\">\n  <tbody>\n  <tr>\n  <td colspan=\"5\">\n    <p><b>Request</b></p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accountResourceId</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Mandatory<br /> \n  \n  The identifier of the account resource (Concatenation of the IBAN and account currency)<br /> \n  \n  Value should be retrieved from the list of accounts</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>dateFrom</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br />\n  \n  The starting date of the transaction list.<br />\n  \n  Default : Current date – 2 years<br />\n\n  Rules : \n  <ul>\n  <li><p>dateFrom >= current date – 4 years (only applicable for Easy Banking Users)</p></li>\n  <li><p>dateFrom >=dateTo - 2years</p></li>\n  </ul>\n  </p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>dateTo</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br />\n  \n  The end date of the transaction list. When not specified, then planned transactions are returned.<br /> \n  \n  Default : Current date<br />\n\n  Rules : dateTo >= dateFrom<br /></p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>afterEntryReference</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Value sent in the original response to be used in the next request to retrieve the list of transactions after this specific entry reference number</p>\n  </td>\n  </tr>\n  <tr>\n  <td colspan=\"5\">\n    <p><b>Response</b></p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>Transaction status</p>\n  </td>\n  <td  colspan=\"4\">\n  <p>Mandatory<br /> \n  \n  The status of the transaction (Can be 'BOOK', 'RJCT', 'PNDG', 'FUTR' or 'RESV')</p>\n  </td>\n  </tr>\n\n  <tr>\n  <td >\n  <p>resourceId</p>\n  </td>\n  <td  colspan=\"4\">\n  <p>Mandatory<br /> \n  \n  The identifier of the account resource (Concatenation of the IBAN and account currency)</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>transactionAmount</p>\n  </td>\n  <td  colspan=\"4\">\n  <p>Mandatory</br></br>The transaction amount</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>creditDebitIndicator</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Mandatory<br /><br /> The indicator specifying if it is a debit or credit operation </p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>transactionAmountDetails>bookedAmount</p>\n  </td>\n  <td >\n  <p>Available<br /><br />The booked amount </p>\n  </td>\n  <td >\n  <p>Optional</p>\n  </td>\n  <td >\n  <p>Not available</p>\n  </td>\n  <td >\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>bookingDate</p>\n  </td>\n  <td  colspan=\"4\">\n  <p>Mandatory<br /><br />The booking date. </p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>valueDate</p>\n  </td>\n  <td >\n  <p>Available</p><p>The value date </p>\n  </td>\n  <td >\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td >\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>transactionDate</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional</p><p>The transaction date </p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>bankTransactionCode</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Available</p><p>The Bank Transaction Codification</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>relatedParties</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> <br />\n  The ebtor or creditor counterpart information<br /><br />\n  If available, either debtor or creditor information is returned per transaction</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p><br /> relatedParties>debtorAgent</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Only bicFi is available<br /> \n  \n  The clearingSystemMemberId is not applicable</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>relatedParties>debtor</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br />\n  \n  Only name is available<br /> \n  \n  The address, privateId and organisationId are not applicable</p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>relatedParties>debtorAccount</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Only IBAN is available<br /> \n  \n  The otherIdentification is not used</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>relatedParties>creditorAgent</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Only bicFi is used<br /> \n  \n  The clearingSystemMemberId is not applicable</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>relatedParties>creditor</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Only name is available<br /> \n  \n  The address, privateId and organisationId are not applicable</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>relatedParties>creditorAccount</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional<br /> \n  \n  Only IBAN is used<br /> \n  \n  The otherIdentification is not used</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>transactionCategoryPurpose</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The category purpose of the transaction</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>remittanceInformation</p>\n  </td>\n  <td colspan=\"4\">\n  <p>Optional</p><p>The remittance information of the transaction</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/statementReference</p>\n  </td>\n  <td>\n  <p>Available</p><p>The transaction statement reference</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/eodOperationReference</p>\n  </td>\n  <td>\n  <p>Available</p><p>The transaction reference</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/endToEndReference</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The SEPA end to end reference</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/mandateReference</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The SEPA mandate reference</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/atmPosName</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The payment location/cash-withdrawel</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/cardNumber</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The card number used for payment or cash-out</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/refusal</p>\n  </td>\n  <td>\n  <p>Not available</p><p>The rejected transaction information</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/narrative</p>\n  </td>\n  <td>\n  <p>Optional</p><p>The description of the transaction</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>additionalTransactionInformation/transactionResourceId</p>\n  </td>\n  <td>\n  <p>Optional<br/><br />\n  \n  The identifyer of the transaction. Can be used to retrieve the extended transaction information</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>details</p>\n  </td>\n  <td>\n  <p>Optional<br/><br />\n  \n  The link to retrieve the extended transaction information</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  <td>\n  <p>Not available</p>\n  </td>\n  </tr>\n  <tr>\n   <td>\n   <p>_links</p>\n   </td>\n   <td colspan=\"4\">\n   <p>Mandatory<br /><br /> The links to be used for further navigation when browsing Account Information. Available links :\n   </p>\n   <ul>\n    <li><p>self: link to the transactions of the account</p></li>\n    <li><p>parent-list: link to the list of all accounts</p></li>\n    <li><p>balances: link to the balances of the account</p></li>\n    <li><p>next: link to the next page of the transactions result</p></li>\n    </ul>\n   </td>\n   </tr>\n  </tbody>\n  </table>\n<h4>Legend :</h4>\n<ul>  \n  <li><p>Available : field optional in the contract and always available in the response</p></li>\n <li> <p>Not available: field optional in the contract and not available in the response</p></li>\n</ul>\n",
+        "summary": "Retrieval of an account transaction set (AISP)",
+        "security": [
+          {
+            "accessCode": [
+              "aisp"
+            ]
+          },
+          {
+            "resourceOwnerIdentification": [
+              "aisp"
+            ]
+          }
+        ],
+        "tags": [
+          "AISP"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/AccountResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/FromImputationDate"
+          },
+          {
+            "$ref": "#/components/parameters/ToImputationDate"
+          },
+          {
+            "$ref": "#/components/parameters/AfterEntryReference"
+          },
+          {
+            "$ref": "#/components/parameters/Index"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete transactions response",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/hal+json; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalTransactions"
+                }
+              }
+            }
+          },
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/accounts/{accountResourceId}/transactions/{transactionResourceId}/details": {
+      "get": {
+        "operationId": "accountsTransactionsDetailsGet",
+        "tags": [
+          "AISP"
+        ],
+        "summary": "Retrieval of a transaction details (AISP)",
+        "description": "<h3>Description</h3>\n   \n   Provide the possibility for an AISP to retrieve extended transaction details for a given account transaction. Only available when the transactionResourceId is available in the GET transactions list.</br>\n   \n <h3>Prerequisites</h3>\n   <ul>\n     <li><p>The TPP has been registered by the Registration Authority for the AISP role.</p></li>\n     <li><p>The TPP and the PSU have a contract (PSU granted his consent to the TPP) that has been enrolled by the ASPSP.</p></li>\n     <li><p>The TPP and the ASPSP have successfully processed a mutual check and authentication.</p></li>\n     <li><p>The TPP has presented its OAUTH2 “Authorization Code”access token.</p></li>\n     <li><p>The TPP has previously retrieved the list of available accounts for the PSU.</p></li>\n   </ul>\n   <p>The following table indicates how to use the different fields :</p>\n <table border=\"1\">\n   <tbody>\n   <tr>\n   <td colspan=\"5\">\n     <p><b>Request</b></p>\n   </td>\n   </tr>\n   <tr>\n   <td>\n   <p>accountResourceId</p>\n   </td>\n   <td colspan=\"4\">\n   <p>Mandatory<br /><br />The identifier of the account resource (can be retrieved from the GET/accounts response).</p>\n   </td>\n   </tr>\n   <tr>\n   <td>\n   <p>transactionResourceId</p>\n   </td>\n   <td colspan=\"4\">\n   <p>Mandatory<br /><br /> The identifier of the transaction (can be retrieved from the GET transactions list)\n   </p>\n   </td>\n   </tr>\n   <tr>\n   <td colspan=\"5\">\n     <p><b>Response</b></p>\n   </td>\n   </tr>\n   <tr>\n   <td>\n   <p>details</p>\n   </td>\n   <td colspan=\"4\">\n   <p>Optional<br /><br /> The extended transaction information in unstructured format available for 6 months from the booking date\n   </p>\n   </td>\n   </tr>\n   <tr>\n   <td>\n   <p>_links</p>\n   </td>\n   <td colspan=\"4\">\n   <p>Optional<br /><br /> The links to be used for further navigation when browsing Account Information. Available links :\n   </p>\n   <ul>\n    <li><p>self: link to the transaction details</p></li>\n    <li><p>transactions: link to the transactions of the account</p></li>\n    <li><p>balances: link to the balances of the account</p></li>\n    <li><p>parent-list: link to the list of all accounts</p></li>\n    </ul>\n   </td>\n   </tr>\n    </tbody>\n   </table>\n   \n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/AccountResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/TransactionResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/hal+json; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalTransactionDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/funds-confirmations": {
+      "post": {
+        "operationId": "fundsConfirmationsPost",
+        "tags": [
+          "CBPI"
+        ],
+        "summary": "Payment coverage check request (CBPII)",
+        "description": "<h3>Description</h3> Provide the possibility for a CBPII to check whether an amount necessary for the execution of a card-based payment transaction is available on a given PSU account (IBAN).\n<h3>Prerequisites</h3>\n  <ul>\n    <li>The TPP has been registered by the Registration Authority for the AISP role.</li>\n    <li>The TPP and the PSU have a contract (PSU granted his consent to the TPP) that has been enrolled by the ASPSP.</li>\n    <li>The TPP and the ASPSP have successfully processed a mutual check and authentication.</li>\n    <li>The TPP has presented its OAUTH2 \"Authorization Code\" access token which allows the ASPSP to identify the relevant PSU.</li>\n  </ul>\n  <p>The following table indicates how to use the different fields :</p>\n<table border=\"1\">\n  <tbody>\n  <tr>\n  <td colspan=\"2\">\n  <p><b>Request</b></p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>paymentCoverageRequestId</p>\n  </td>\n  <td>\n  <p>Mandatory</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>paye</p>\n  </td>\n  <td>\n  <p>Optional</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>instructedAmount</p>\n  </td>\n  <td>\n  <p>Mandatory</p>\n  </td>\n  </tr>\n  <tr>\n  <td>\n  <p>accountId</p>\n  </td>\n  <td>\n  <p>Mandatory<br /> 'accountId' value should be retrieved from the list of accounts</p>\n  </td>\n  </tr>\n  <tr>\n  <td colspan=\"2\">\n  <p><b>Response</b></p>\n  </td>\n  </tr>\n  <tr>\n  <td >\n  <p>result</p>\n  </td>\n  <td>\n  <p>Mandatory<br />     true: the payment can be covered<br />     false: the payment cannot be covered</p>\n  </td>\n  </tr>\n  </tbody>\n  </table>\n<h4>Legend :</h4> <ul>  \n  <li>Available : field optional in the contract and always available in the response</li>\n <li> Not available: field optional in the contract and not available in the response</li>\n</ul>      \n",
+        "security": [
+          {
+            "accessCode": [
+              "cbpi"
+            ]
+          },
+          {
+            "resourceOwnerIdentification": [
+              "cbpi"
+            ]
+          },
+          {
+            "clientCredentials": [
+              "cbpi"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCoverageRequestResource"
+              }
+            }
+          },
+          "description": "parameters of a payment coverage request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "payment coverage request",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/hal+json; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalPaymentCoverageReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/payment-requests": {
+      "post": {
+        "operationId": "paymentRequestsPost",
+        "tags": [
+          "PISP"
+        ],
+        "summary": "Payment request initiation (PISP)",
+        "description": "<h3>Description</h3>\nProvide the possibility for a TPP to initiate a payment on behalf of a BNPPF customer.\n<ul>\n  <li>payment request on behalf of a merchant</li>\n  <li>transfer request on behalf of the account's owner</li>\n  <li>standing-order request on behalf of the account's owner</li>\n</ul>\n\n<h3>Prerequisites</h3>\n<ul>\n  <li>The TPP has been registered by the Registration Authority for the PISP role. </li>\n  <li>The TPP was provided with an OAUTH2 \"Client Credential\" access token by the ASPSP. </li>\n  <li>The TPP and the ASPSP have successfully processed a mutual check and authentication. </li>\n  <li>The TPP has presented its \"OAUTH2 Client Credential\" access token.\n</ul>\n\n<h3>Authentication approach</h3>\nThe only authentication approach supported is the REDIRECT authentication  \n\n<h3>Payment initiation</h3>\nThe ASPSP saves the request and answers to the PISP. The answer embeds: \n  <ul>\n    <li>A location link of the saved request that will be further used to retrieve the request and its status information. </li>\n    <li>The URL to be used by the PISP for redirecting the PSU in order to perform an authentication. </li>\n  </ul>\n  \n<h3>Payment confirmation</h3>\nCase of the PSU successfully confirms his payment, the response is returned to the PISP using the call back URL.\n\nCase of the PSU neither gives nor denies his/her consent, the request expires and is then rejected to the PISP. The expiration delay is equal to 60 minutes.\n\n<h3>Payment instruments supported</h3>\nFollowing payment instruments are supported at this stage:\n  <ul>\n    <li>single SEPA Credit Transfer</li>\n    <li>single International Payment</li>\n    <li>single Standing Order (Belgian to Belgian) </li>\n    <li>single Instant Payment </li>\n  </ul>\n\nThe following table indicates how to use the different fields, depending on the payment instrument:\n<table border=\"1\">\n<thead>\n<tr>\n<td>Structure</td>\n<td>SEPA payment</td>\n<td> Standing orders</td>\n<td>International payment</td>\n<td>Instant payment</td>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>numberOfTransaction (payment level)</td>\n<td>Only \"1\"</td>\n<td>Only \"1\"</td>\n<td>Only \"1\"</td>\n<td>Only \"1\"</td>\n</tr>\n<tr>\n<td>pymentTypeInformation/ InstructionPriority (payment level)</td>\n<td>Must be empty or one of the following values:\n<ul>\n  <li>\"HIGH\" for high-priority, Only supported for Corporate customers </li>\n  <li>\"NORM\" for normal </li>\n  <li>Default value \"NORM\" </li>\n  </ul>\n</td>\n<td>Not applicable</td>\n<td>Must be empty or one of the following values:\n<ul>\n  <li>\"HIGH\" for high-priority, Only supported for Corporate customers </li>\n  <li>\"NORM\" for normal </li>\n  <li>Default value \"NORM\" </li>\n  </ul>\n</td>\n<td>Not applicable</td> \n</tr>\n<tr>\n<td>PaymentTypeInformation/ ServiceLevel (payment level)</td>\n<td>\"SEPA\"</td>\n<td>\"SEPA\"</td>\n<td>Must be empty</td>\n<td>\"SEPA\"</td>\n</tr>\n<tr>\n<td>PaymentTypeInformation/ LocalInstrument (payment level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>\"INST\"</td>\n</tr>\n<tr>\n<td>PaymentTypeInformation/ CategoryPurpose (payment level)</td>\n<td>Only applicable for Corporate customers.\n<ul>\n<li>\"DIVI\": Dividend</li>\n<li>\"INTC\": Intra Company Payment</li>\n<li>\"INTE\": Interest Payment</li>\n<li>\"PENS\": Pension Payment</li>\n<li>\"SALA\": Salary Payment</li>\n<li>\"SSBE\": Social Security Benefit</li>\n<li>\"SUPP\": Supplier Payment</li>\n<li>\"TAXS\": Tax Payment</li>\n<li>\"TREA\": Treasury Payment</li>\n</ul></td>\n<td>Not applicable</td>\n<td>Only applicable for Corporate customers.\n<ul>\n<li>\"DIVI\": Dividend</li>\n<li>\"INTC\": Intra Company Payment</li>\n<li>\"INTE\": Interest Payment</li>\n<li>\"PENS\": Pension Payment</li>\n<li>\"SALA\": Salary Payment</li>\n<li>\"SSBE\": Social Security Benefit</li>\n<li>\"SUPP\": Supplier Payment</li>\n<li>\"TAXS\": Tax Payment</li>\n<li>\"TREA\": Treasury Payment</li>\n</ul></td> <td>Only applicable for Corporate customers.\n<ul>\n<li>\"DIVI\": Dividend</li>\n<li>\"INTC\": Intra Company Payment</li>\n<li>\"INTE\": Interest Payment</li>\n<li>\"PENS\": Pension Payment</li>\n<li>\"SALA\": Salary Payment</li>\n<li>\"SSBE\": Social Security Benefit</li>\n<li>\"SUPP\": Supplier Payment</li>\n<li>\"TAXS\": Tax Payment</li>\n<li>\"TREA\": Treasury Payment</li>\n</ul></td>\n</tr>\n<tr>\n<td>Debtor (payment level)</td>\n<td>\nOptional. \n<ul>\n<li>If not specified, then PSU can choose the debtor account in the redirection flow.</li>\n<li>If specified, then IBAN must be provided. Other account identifications are not supported</li>\n<li>The account currency is optional. If specified, the account currency must be set to \"EUR\".</li>\n</ul>\n</td>\n<td> Optional. \n<ul>\n<li>If not specified, then PSU can choose the debtor account in the redirection flow.</li>\n<li> If specified, then IBAN must be provided (Only Belgian accounts are supported). Other account identifications are not supported. <li>\n<li>The account currency is optional. If specified, the account currency must be set to \"EUR\".</li>\n</ul>\n</td>\n<td>\nOptional. \n<ul>\n<li>If not specified, then PSU can choose the debtor account in the redirection flow.</li>\n<li> If specified, then IBAN and account currency must be provided. Other account identifications are not supported.</li>\n</ul>\n</td> <td>\nOptional. \n<ul>\n<li>If not specified, then PSU can choose the debtor account in the redirection flow.</li>\n<li>If specified, then IBAN must be provided. Other account identifications are not supported</li>\n<li>The account currency is optional. If specified, the account currency must be set to \"EUR\".</li>\n</ul>\n</td>\n\n</tr>\n<tr>\n<td>Beneficiary (payment level)</td>\n<td>Mandatory</td>\n<td>Mandatory</td>\n<td>Mandatory</td> <td>Mandatory</td>\n</tr>\n<tr>\n<td>Beneficiary/isTrusted (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/ creditorAccount (payment level)</td>\n<td>Mandatory. Only IBAN is supported</td>\n<td>Mandatory. Only IBAN is supported</td>\n<td>Mandatory. Both IBAN and BBAN are supported</td>\n<td>Mandatory. Only IBAN is supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/bicFi (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Optional. bicFi or name must be provided.</td>\n<td>Optional</td>\n</tr> \n<tr>\n<td>Beneficiary/creditorAgent/name (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Optional. bicFi or name must be provided.</td>\n<td>Optional</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/clearingSystemMemberId (payment level)</td>\n<td>Not supported</td> <td>Not supported</td> <td>Not supported</td> <td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/postalAddress/addressLine (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Not supported</td>\n<td>Optional</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/postalAddress/country (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Mandatory</td>\n<td>Optional</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/postalAddress/townName (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional. Must be provided if bicFi is not provided.</td>\n <td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/postalAddress/postCode (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional</td>\n<td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditorAgent/postalAddress/streetName (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional</td>\n<td>Not supported</td>\n</tr>\n<tr> \n<td>Beneficiary/creditor/postalAddress/addressLine (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Not supported</td>\n<td>Optional</td>\n</tr>\n<tr>\n<td>Beneficiary/creditor/postalAddress/country (payment level)</td>\n<td>Optional</td>\n<td>Optional</td>\n<td>Mandatory</td>\n<td>Optional</td>\n</tr>\n<tr>\n<td>Beneficiary/creditor/postalAddress/townName (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional</td>\n<td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditor/postalAddress/postCode (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional</td>\n<td>Not supported</td>\n</tr>\n<tr>\n<td>Beneficiary/creditor/postalAddress/streetName (payment level)</td>\n<td>Not supported</td>\n<td>Not supported</td>\n<td>Optional</td>\n<td>Not supported</td>\n</tr>\n<tr>\n<td>ultimateCreditor (payment level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td> <td>Not applicable</td>\n</tr>\n<tr>\n<td>purpose (payment level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>ChargeBearer (payment level)</td>\n<td>Must be empty or \"SLEV\"\nDefault value : \"SLEV\" (Shared)\n</td>\n<td>Must be empty or \"SLEV\" (Shared)\nDefault value : \"SLEV\"\n</td>\n<td>\nMust be empty or one of the following values:\n<ul>\n<li>\"CRED\" (Borne by debtor) </li>\n<li>\"DEBT\" (Borne by creditor) </li>\n<li>\"SHAR\" (Shared) </li>\n<li>Default value : \"SHAR\"</li>\n</ul>\n</td> <td>Must be empty or \"SLEV\"\nDefault value : \"SLEV\" (Shared)\n</td>\n</tr>\n<tr>\n<td>paymentInformationstatus</td>\n<td> Only supported values :\"ACTC\", \"ACCP\", \"PNDG, \"ACSP\", \"ACSC\",\"RJCT\"</td>\n<td> Only supported values :\"ACTC\", \"ACCP\", \"PNDG, \"ACSP\", \"ACSC\",\"RJCT\"</td>\n<td> Only supported values :\"ACTC\", \"ACCP\", \"PNDG, \"ACSP\", \"ACSC\",\"RJCT\"</td>\n<td> Only supported values :\"ACTC\", \"ACCP\", \"PNDG, \"ACSP\", \"ACSC\",\"RJCT\"</td>\n</tr>\n<tr>\n<td>requestedExecutionDate (payment level)</td>\n<td>Mandatory. Any date matching below conditions:\n<ul>\n<li>greater or equals to \"current date\" </li>\n<li>lower than \"current date + 1 year\"</li>\n</ul></td>\n<td>Not applicable</td>\n<td>Mandatory\n<ul>\n<li> Retail customers:\nMust be equals to the current date as future-dated international payments are not supported for retail customers.</li>\n<li> Corporate customers:\nAny date matching specified conditions.\n<ul>\n<li>greater or equals to \"current date\" </li>\n<li>lower than \"current date + 1 year\"</li>\n</ul>\n</li>\n</ul>\n</td>\n<td>Mandatory. Must be equals to the current date. \n</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/requestedExecutionDate (transaction level)</td>\n<td>Not applicable</td>\n<td>Mandatory, Any date matching below conditions:\n<ul>\n<li>greater or equals to \"current date + 2 days\" </li>\n<li>lower than \"current date + 1 year\"</li>\n</ul>\n</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/instructedAmount (transaction level)</td>\n<td>Mandatory </td>\n<td>Mandatory for Standing Order with fixed amount only </td>\n<td>Mandatory </td>\n<td>Mandatory </td>\n</tr>\n<tr>\n<td>creditTransferTransaction/instructedAmount/currency (transaction level)</td>\n<td> \"EUR\"</td>\n<td> \"EUR\"</td>\n<td>Any valid ISO currency code</td>\n<td> \"EUR\"</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/instructedAmount/amount (transaction level)</td>\n<td>Any amount greater than or equals to 0.01€</td>\n<td>Any amount greater than or equals to 2.50€</td>\n<td>Any amount greater than or equals to 0.01€</td>\n<td>Any amount greater than or equals to 0.01€</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/minimalAmount (transaction level)</td>\n<td> Not applicable</td>\n<td>Mandatory for Standing Order with variable amount only</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/minimalAmount/currency (transaction level)</td>\n<td>Not applicable</td>\n<td> \"EUR\"</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/minimalAmount/amount (transaction level)</td>\n<td>Not applicable</td>\n<td>Any amount greater than or equals to 0.01€</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td> creditTransferTransaction/frequency (transaction level)</td>\n<td>Not applicable</td>\n<td>Mandatory. Must be one of the following values:\n<ul>Retail customers:\n<li>\"WEEK\" (Weekly) </li>\n<li>\"MNTH\" (Monthly) </li>\n<li>\"QUTR\" (Quarterly) </li>\n<li>\"SEMI\" (Once every 6 months) </li>\n<li>\"YEAR\" (Yearly) </li>\n</ul>\n<ul>Corporate customers:\n<li>\"WEEK\" (Weekly) </li>\n<li>\"TOWK\" (Once every two weeks) </li>\n<li>\"MNTH\" (Monthly) </li>\n<li>\"TOMN\" (Once every two months) </li>\n<li>\"QUTR\" (Quarterly) </li>\n<li>\"SEMI\" (Once every 6 months) </li>\n<li>\"YEAR\" (Yearly) </li>\n</ul>\n</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/endDate (transaction level)</td>\n<td>Not applicable</td>\n<td>Optional. If both enDate and numberOfOccurences are not specified. Then standing order payment is considered as endless. \n<ul>\n<li>If endDate is specified. Then numberOfOccurences must not be specified.</li>\n<li>When specified. Then endDate must allow to run: </li>\n<li>minimum 2 payment occurrences </li>\n<li>maximum 999 payment occurrences [IF frequency is \"weekly\" or \"once every 2 weeks\"]</li>\n<li>maximum 960 payment occurrences [IF frequency is \"monthly\"]</li>\n<li>maximum 480 payment occurrences [IF frequency is \"once every 2 months\"]</li>\n<li>maximum 320 payment occurrences [IF frequency is \"quarterly\"]</li>\n<li>maximum 160 payment occurrences [IF frequency is \"once every 6 months\"]</li>\n<li>maximum 80 payment occurrences [IF frequency is \"yearly\"]</li>\n<ul>\n</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/numberOfOccurences (transaction level)</td>\n<td>Not applicable</td>\n<td>Optional. If both enDate and numberOfOccurences are not specified. Then standing order payment is considered as endless. \n<ul>\n<li>If numberOfOccurences is specified. Then endDate must not be specified.</li>\n<li>When specified. Then numberOfOccurences must allow to run:</li>\n<li>minimum 2 payment occurrences </li>\n<li>maximum 999 payment occurrences [IF frequency is \"weekly\" or \"once every 2 weeks\"]</li>\n<li>maximum 960 payment occurrences [IF frequency is \"monthly\"]</li>\n<li>maximum 480 payment occurrences [IF frequency is \"once every 2 months\"]</li>\n<li>maximum 320 payment occurrences [IF frequency is \"quarterly\"]</li>\n<li>maximum 160 payment occurrences [IF frequency is \"once every 6 months\"]</li>\n<li>maximum 80 payment occurrences [IF frequency is \"yearly\"]</li>\n<ul>\n</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/dayOfExecution (transaction level)</td>\n<td>Not applicable </td>\n<td>Optional. Possible values if frequency is \"WEEK\" or \"TOWK\": \n<ul>\n<li>\"01\" (Monday)</li>\n<li>\"02\" (Tuesday) </li>\n<li>\"03\" (Wednesday) </li>\n<li>\"04\" (Thursday) </li>\n<li>\"05\" (Friday) </li>\n</ul>\n<ul>Possible values if frequency is \"MNTH\", \"TOMN\", \"QUTR\", \"SEMI\" or \"YEAR\"\n<li>Empty</li>\n<li>\"31\" (Last day of the month)</li>\n</ul>\n</td>\n<td>Not applicable </td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>creditTransferTransaction/beneficiary (transaction level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr> \n<tr>\n<td>creditTransferTransaction/ultimateCreditor (transaction level) </td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td> creditTransferTransaction/regulatoryReportingCodes (transaction level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td> creditTransferTransaction/remittanceInformation (transaction level)</td>\n<td>Optional. Can be:\n<ul> <li>Empty</li> <li>Unstructured remittance</li>\n<li>Belgian structured remittance</li>\n<li>European structured remittance</li>\n</ul>\n</td>\n<td>Optional. Can be:\n<ul> <li>Empty</li> <li>Unstructured remittance</li>\n<li>Belgian structured remittance</li>\n</ul>\n</td>\n<td> Optional. Can be:\n<ul>\n  <li>Empty</li>\n<li>Unstructured remittance</li>\n<li>Belgian structured remittance</li>\n<li>European structured remittance</li>\n</ul>\n</td> <td>Optional. Can be:\n<ul> <li>Empty</li> <li>Unstructured remittance</li>\n<li>Belgian structured remittance</li>\n</ul>\n</td>\n</tr>\n<tr>\n<td> creditTransferTransaction/transactionStatus (transaction level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td> <td>Not applicable</td>\n</tr>\n<tr>\n<td> creditTransferTransaction/statusReasonInformation (transaction level)</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n<td>Not applicable</td>\n</tr>\n<tr>\n<td>supplementaryData/acceptedAuthenticationApproach</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n</tr>\n<tr>\n<td>supplementaryData/appliedAuthenticationApproach</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n<td>\"REDIRECT\"</td>\n</tr>\n<tr>\n<td>supplementaryData/successfulReportUrl</td>\n<td>Mandatory for REDIRECT authentication approch.</td>\n<td>Mandatory for REDIRECT authentication approch.</td>\n<td>Mandatory for REDIRECT authentication approch.</td>\n<td>Mandatory for REDIRECT authentication approch.</td>\n</tr>\n<tr>\n<td>supplementaryData/unsuccessfulReportUrl</td>\n<td>Optional, if not specified successfulReportUrl is used</td>\n<td>Optional, if not specified successfulReportUrl is used</td>\n<td>Optional, if not specified successfulReportUrl is used</td>\n<td>Optional, if not specified successfulReportUrl is used</td>\n</tr>\n</tbody>\n</table>\n\n  \n",
+        "security": [
+          {
+            "clientCredentials": [
+              "pisp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          },
+          {
+            "$ref": "#/components/parameters/BusinessLineName"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PaymentRequestResource"
+        },
+        "responses": {
+          "201": {
+            "description": "The request has been created as a resource. The ASPSP must authenticate the PSU.",
+            "headers": {
+              "location": {
+                "description": "URI of the created (and updated if needed) Payment Request. \nActually, this link is the URI to be used (cf Â§ 4.6) for retrieving the Payment Request ant its status:\n  - GET /payment-requests/{paymentRequestResourceId}\nThe parameter {paymentRequestResourceId} is the identifier of the Payment Request, as the resource that was created on the ASPSP server side.                        \n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalPaymentRequestCreation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/payment-requests/{paymentRequestResourceId}": {
+      "get": {
+        "operationId": "paymentRequestsGet",
+        "tags": [
+          "PISP"
+        ],
+        "summary": "Retrieval of a payment request (PISP)",
+        "description": "<h3>Description</h3> Provide the possibility for a TPP to get a posted payment request.\nPayment request information can be retrieved up to 30 days after payment reached a final status : <ul> <li>AcceptedSettlementCompleted = \"ACSC\"</li> <li>Rejected = \"RJCT\"</li></ul>All date fields are returned in UTC format : <ul><li>requestedExecutionDate</li><li>creationDateTime</li><li>endDate</li></ul> <h3>Prerequisites</h3> <ul> <li>The TPP has been registered by the Registration Authority for the PISP role.</li> <li>The TPP was provided with an OAUTH2 \"Client Credential\" access token by the ASPSP.</li> <li>The TPP and the ASPSP have successfully processed a mutual check and authentication.</li> <li>The TPP has presented its \"OAUTH2 Client Credential\" access token.</li> </ul>\n",
+        "security": [
+          {
+            "clientCredentials": [
+              "pisp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/PaymentRequestResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieval of the previously posted Payment Request",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "businessLineName": {
+                "description": "The businessLine on which the TPP wants to redirect the user. Possible values are RPB (for Easy Banking Web users) or CPB (for Easy Banking Business users).\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalPaymentRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "put": {
+        "operationId": "paymentRequestPut",
+        "tags": [
+          "PISP"
+        ],
+        "summary": "Modification of a Payment/Transfer Request (PISP)",
+        "description": "<h3>Description</h3> Provide the possibility for a TPP to cancel a posted payment request on behalf of a BNPPF customer.\n<h3>Prerequisites</h3> <ul> <li>The TPP has been registered by the Registration Authority for the PISP role.</li> <li>The TPP was provided with an OAUTH2 \"Client Credential\" access token by the ASPSP.</li> <li>The TPP and the ASPSP have successfully processed a mutual check and authentication.</li> <li>The TPP has presented its \"OAUTH2 Client Credential\" access token.</li> </ul> <h3>Authentication approach</h3> The only authentication approach supported is the REDIRECT authentication.\n<h3>Cancel initiation</h3> Only Future-dated SEPA Credit Transfers and standing orders with status \"ACSP\" can be cancelled. Future-dated international payments can not be cancelled.\nThe PISP must provide the posted Payment Request and set : <ul> <li>paymentInformationStatus = \"RJCT\" </li> <li>statusReasonInformation = \"DS02\" </li> </ul> The ASPSP receives the request and answers to the PISP. The answer embeds the URL to be used by the PISP for redirecting the PSU in order to perform an authentication.\n<h3>Cancel confirmation</h3> <ul> <li>Case of the PSU successfully confirms his cancellation, the response is returned to the PISP using the call back URL.</li> <li>Case of the PSU denies his/her consent, the cancellation request is rejected to the PISP.</li> </ul>\n",
+        "security": [
+          {
+            "clientCredentials": [
+              "pisp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/PaymentRequestResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          },
+          {
+            "$ref": "#/components/parameters/BusinessLineName"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PaymentRequestResource"
+        },
+        "responses": {
+          "200": {
+            "description": "The modification request has been saved. The ASPSP must authenticate the PSU before committing the update.\nThe call back url for the cancellation of the payment request as follows \"https://services.hellobank.be/HB/PSD2/Payment-cancellation?paymentRequestResourceId=xxxxxxxx&redirect_uri=http://myPisp/PaymentFailure\"",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalPaymentRequestCreation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/file-payment-requests": {
+      "post": {
+        "operationId": "createFilePaymentRequestsConfirmationLink",
+        "tags": [
+          "PISP"
+        ],
+        "summary": "Create a PAIN001 file payment request (PISP)",
+        "description": "<h3>Description</h3>\n\nProvide the possibility for a TPP to initiate a file payment on behalf of a BNPPF customer. \n\nPAIN.001 XML format is used for this type of payment request.</br>\nSupported PAIN.001 XML formats :\n- PAIN.001.001.02 \n- PAIN.001.001.03 \n\nPlease note that this type of payment request is only available for Easy Banking Business Users. Thus, the parameter 'businessLineName' must always be set to 'CPB'.\n  <h3>Prerequisites</h3>\n\n  <ul>\n\n  <li>The TPP has been registered by the Registration Authority for the\n  PISP role. </li>\n\n  <li>The TPP was provided with an OAUTH2 \"Client Credential\" access token\n  by the ASPSP. </li>\n\n  <li>The TPP and the ASPSP have successfully processed a mutual check and\n  authentication. </li>\n\n  <li>The TPP has presented its \"OAUTH2 Client Credential\" access token.\n\n  </ul>\n\n  <h3>Authentication approach</h3>\n\n\n  The only authentication approach supported is the REDIRECT authentication.\n\n\n  <h3>Payment initiation</h3>\n\n  The ASPSP saves the request and answers to the PISP. The answer embeds: \n\n  <ul>\n\n  <li>A location link of the saved request that will be further used to\n  retrieve the request and its status information. </li>\n\n  <li>The URL to be used by the PISP for redirecting the PSU in order to\n  perform an authentication. </li>\n\n  </ul>\n\n  <h3>Payment confirmation</h3>\n\n  Case of the PSU successfully confirms his payment, the response is returned to the PISP using the call back URL.\n\n\n  Case of the PSU neither gives nor denies his/her consent, the request expires and is then rejected to the PISP. The expiration delay is equal to 60 minutes.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          },
+          {
+            "name": "businessLineName",
+            "in": "header",
+            "description": "The businessLine on which the TPP wants to redirect the user. Only CPB (for Easy Banking Business users) is supported\n",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CPB"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePaymentRequest"
+              }
+            }
+          },
+          "description": "File payment Initiation Request",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The request was created as a resource. The ASPSP must authenticate the PSU.",
+            "headers": {
+              "location": {
+                "description": "URI of the created (and updated if needed) Payment Request.\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HalFilePaymentRequestCreation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "405": {
+            "$ref": "#/components/responses/405"
+          },
+          "406": {
+            "$ref": "#/components/responses/406"
+          },
+          "408": {
+            "$ref": "#/components/responses/408"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/file-payment-requests/{paymentRequestResourceId}": {
+      "get": {
+        "operationId": "getFilePaymentRequestsStatus",
+        "tags": [
+          "PISP"
+        ],
+        "summary": "Retrieval of the file payment initiation status (PISP)",
+        "description": "<h3>Description</h3> \n\nProvide the possibility for a TPP to get a posted file payment request including its status. </br>\n\nFile payment request information can be retrieved up to 30 days after payment reached a final status :\n  \n  - AcceptedSettlementInProcess = \"ACSP\"\n  - Rejected = \"RJCT\" \n\n All date fields are returned in UTC format : <ul><li>requestedExecutionDate</li></ul>\n\nPlease note that the file payment will be executed without feedback. </br>\nAvailable statuses :\n - AcceptedTechnicalValidation = \"ACTC\"\n - AcceptedCustomerProfile = \"ACCP\"\n - Pending = PNDG\n - AcceptedSettlementInProcess = \"ACSP\"\n - Rejected =  \"RJCT\"\n \n<h3>Prerequisites</h3> <ul>\n<li>The TPP has been registered by the Registration Authority for the\nPISP role.</li> <li>The TPP was provided with an OAUTH2 \"Client\nCredential\" access token by the ASPSP.</li> <li>The TPP and the ASPSP\nhave successfully processed a mutual check and authentication.</li>\n<li>The TPP has presented its \"OAUTH2 Client Credential\" access\ntoken.</li> </ul>\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaymentRequestResourceIdentification"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpAddressHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuIpPortHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuHttpMethodHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDateHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuGeoLocation"
+          },
+          {
+            "$ref": "#/components/parameters/PsuUserAgentHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuRefererHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptCharsetHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptEncodingHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuAcceptLanguageHeader"
+          },
+          {
+            "$ref": "#/components/parameters/PsuDeviceId"
+          },
+          {
+            "$ref": "#/components/parameters/Correlation"
+          },
+          {
+            "$ref": "#/components/parameters/AuthorizationParameter"
+          },
+          {
+            "$ref": "#/components/parameters/DigestHeader"
+          },
+          {
+            "$ref": "#/components/parameters/SignatureHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieval of the previously posted Payment Request",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Digest": {
+                "description": "Digest of the body",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Signature": {
+                "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePaymentResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/psd2/v3"
+    }
+  ],
+  "components": {
+    "parameters": {
+      "AccountResourceIdentification": {
+        "name": "accountResourceId",
+        "in": "path",
+        "description": "Identification of account resource to fetch",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+        }
+      },
+      "PaymentRequestResourceIdentification": {
+        "name": "paymentRequestResourceId",
+        "in": "path",
+        "description": "Identification of the Payment Request Resource",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+        }
+      },
+      "AfterEntryReference": {
+        "name": "afterEntryReference",
+        "in": "query",
+        "description": "Specifies the value on which the result has to be computed. \n      \nOnly the transaction having a technical identification greater than this value must be included within the result\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "maxLength": 40
+        }
+      },
+      "ToImputationDate": {
+        "name": "dateTo",
+        "in": "query",
+        "description": "Exclusive maximal imputation date of the transactions. \n      \nTransactions having an imputation date equal to this parameter are not included within the result.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "Index": {
+        "name": "index",
+        "in": "query",
+        "description": "field used for pagination in the transactions.\n",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "FromImputationDate": {
+        "name": "dateFrom",
+        "in": "query",
+        "description": "Inclusive minimal imputation date of the transactions. \n      \nTransactions having an imputation date equal to this parameter are included within the result.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "AuthorizationParameter": {
+        "name": "Authorization",
+        "in": "header",
+        "description": "Access token to be passed as a header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuIpAddressHeader": {
+        "name": "PSU-IP-Address",
+        "in": "header",
+        "description": "IP address used by the PSU's terminal when connecting to the TPP",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuIpPortHeader": {
+        "name": "PSU-IP-Port",
+        "in": "header",
+        "description": "IP port used by the PSU's terminal when connecting to the TPP",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuHttpMethodHeader": {
+        "name": "PSU-HTTP-Method",
+        "in": "header",
+        "description": "Http method for the most relevant PSU's terminal request to the TTP",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuDateHeader": {
+        "name": "PSU-Date",
+        "in": "header",
+        "description": "Timestamp of the most relevant PSU's terminal request to the TTP",
+        "schema": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "PsuGeoLocation": {
+        "name": "PSU-GEO-Location",
+        "in": "header",
+        "description": "Geographical location of the PSU as provided by the PSU mobile terminal if any to the TPP",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuUserAgentHeader": {
+        "name": "PSU-User-Agent",
+        "in": "header",
+        "description": "\"User-Agent\" header field sent by the PSU terminal when connecting to the TPP\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuRefererHeader": {
+        "name": "PSU-Referer",
+        "in": "header",
+        "description": "\"Referer\" header field sent by the PSU terminal when connecting to the TPP.\nNotice that an initial typo in RFC 1945 specifies that \"referer\" (incorrect spelling) is to be used. The correct spelling \"referrer\" can be used but might not be understood.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuAcceptHeader": {
+        "name": "PSU-Accept",
+        "in": "header",
+        "description": "\"Accept\" header field sent by the PSU terminal when connecting to the TPP\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuAcceptCharsetHeader": {
+        "name": "PSU-Accept-Charset",
+        "in": "header",
+        "description": "\"Accept-Charset\" header field sent by the PSU terminal when connecting to the TPP\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuAcceptEncodingHeader": {
+        "name": "PSU-Accept-Encoding",
+        "in": "header",
+        "description": "\"Accept-Encoding\" header field sent by the PSU terminal when connecting to the TPP\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuAcceptLanguageHeader": {
+        "name": "PSU-Accept-Language",
+        "in": "header",
+        "description": "\"Accept-Language\" header field sent by the PSU terminal when connecting to the TPP\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PsuDeviceId": {
+        "name": "PSU-Device-ID",
+        "in": "header",
+        "description": "UUID (Universally Unique Identifier) for a device, which is used by the PSU, if available.\nUUID identifies either a device or a device dependant application installation.\nIn case of installation identification this ID need to be unaltered until removal from device.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TransactionResourceIdentification": {
+        "name": "transactionResourceId",
+        "description": "Identification of transaction resource",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^([-a-zA-Z0-9_ /?:().,']{1,35})$"
+        }
+      },
+      "DigestHeader": {
+        "name": "Digest",
+        "in": "header",
+        "required": false,
+        "description": "Digest of the body",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SignatureHeader": {
+        "name": "Signature",
+        "in": "header",
+        "required": true,
+        "description": "http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/)\nThe keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Correlation": {
+        "name": "X-Request-ID",
+        "in": "header",
+        "required": true,
+        "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+        "schema": {
+          "type": "string",
+          "maxLength": 70
+        }
+      },
+      "BusinessLineName": {
+        "name": "businessLineName",
+        "in": "header",
+        "required": true,
+        "description": "The businessLine on which the TPP wants to redirect the user. Possible values are RPB (for Individuals/Retail banking) or CPB (for Corporate/Enterprise banking)\n.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "RPB",
+            "CPB"
+          ]
+        }
+      },
+      "PeriodReference": {
+        "name": "period",
+        "description": "Card period on which the transactions are requested\n| Code | Description | \n| ---- | ---------- | \n| CUR | Current period | \n| PRV | Previous period | \n",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "CUR",
+            "PRV"
+          ]
+        }
+      },
+      "PageNumber": {
+        "name": "pageNumber",
+        "description": "Page number of the transaction list to retrieve. Must be set to 1 for the first call. Possible values can be from 1 to the pageTotalNumber.\n",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "responses": {
+      "204": {
+        "description": "No content.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid status value",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized, authentication failure.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Forbidden, authentication successful but access to resource is not allowed.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not found, no account available.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "405": {
+        "description": "Method Not Allowed.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "406": {
+        "description": "Not Acceptable.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "408": {
+        "description": "Request Timeout.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "429": {
+        "description": "Too many requests.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal server error.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "503": {
+        "description": "Service unavailable.",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Correlation header to be set in a request and retrieved in the relevant response\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "PaymentRequestResource": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PaymentRequestResource"
+            }
+          }
+        },
+        "description": "ISO20022 based payment Initiation Request",
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "accessCode": {
+        "description": "In order to access the PSU's account or card information, the AISP needs to get aither an authorization code grant or a resource owner password OAUTH2 token.\nThe client_id field within the token request must be filled with the value of the organization identifier attribute that has been set in the distinguished name of eIDAS certificate of the TPP, according to ETSI recommandations. \nPossible values for the {brand} parameter below are bnpparibasfortis, fintro, hellobank\nThe authorizationUrl is an example.  For the correct url you can check the following link: https://developer.bnpparibasfortis.com/api-references on the product info\n(cf Â§5.2.1 of [ETSI specfication](https://www.etsi.org/standards-search#page=1&search=TS119495))\n",
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://services.{brand}.be/authorize",
+            "tokenUrl": "https://regulatory.api.{brand}.be/token",
+            "scopes": {
+              "aisp": "Access by an AISP to one given PSU's account",
+              "cbpi": "Access by a CBPII to one given PSU's account to check payment coverage"
+            }
+          }
+        }
+      },
+      "resourceOwnerIdentification": {
+        "description": "In order to access the PSU's account or card information, the AISP needs to get aither an authorization code grant or a resource owner password OAUTH2 token.\nThe client_id field within the token request must be filled with the value of the organization identifier attribute that has been set in the distinguished name of eIDAS certificate of the TPP, according to ETSI recommandations. \nPossible values for the {brand} parameter below are bnpparibasfortis, fintro, hellobank\n(cf Â§5.2.1 of [ETSI specfication](https://www.etsi.org/standards-search#page=1&search=TS119495))\n",
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "tokenUrl": "https://oauth2.aspsp/token",
+            "scopes": {
+              "aisp": "Access by an AISP to one given PSU's account",
+              "cbpi": "Access by a CBPII to one given PSU's account to check payment coverage"
+            }
+          }
+        }
+      },
+      "clientCredentials": {
+        "description": "In order to post a Payment or Transfer Request, the PISP needs to get an client credential OAUTH2 token. \nThe client_id field within the token request must be filled with the value of the organization identifier attribute that has been set in the distinguished name of eIDAS certificate of the TPP, according to ETSI recommandations. \nPossible values for the {brand} parameter below are bnpparibasfortis, fintro, hellobank\n(cf Â§5.2.1 of [ETSI specfication](https://www.etsi.org/standards-search#page=1&search=TS119495))\n",
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://regulatory.api.{brand}.be/token",
+            "scopes": {
+              "pisp": "Access by a PISP to payments resources",
+              "cbpi": "Access by a CBPII to one given PSU's account to check payment coverage"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "HalTransactionDetails": {
+        "x-DefinitionType": "Hal",
+        "description": "HYPERMEDIA structure used for returning the details of a given transaction",
+        "type": "object",
+        "required": [
+          "details",
+          "_links"
+        ],
+        "properties": {
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Detail"
+            },
+            "description": "Extended transaction details"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/TransactionDetailsLinks"
+          }
+        },
+        "example": {
+          "details": [
+            {
+              "detail": [
+                "IBAN     BE02363575539840",
+                "BIC CODE        BBRUBEBB",
+                "COMMUNICATION   TEST///ULTD//NAME/PT01FP12016470000",
+                "001-0037101-26/EUR                                           FOLIO : 1",
+                "1/CIB BE STET 8394 ACCOUNT HOLDER",
+                "MONTANT VERSE           USD                   25,39",
+                "EN FAVEUR DE    1/CIB BE STET 8394 ACCOUNT HOLDER",
+                "                2/CIB BE STET 8394 ADDRESS 1CIB BE",
+                "                2/STET 8394 ADDRESS 2",
+                "                3/BE/NOT PROVIDED",
+                "                3/BE/NOT PROVIDED"
+              ]
+            }
+          ],
+          "_links": {
+            "self": {
+              "href": "/accounts/BE59001223710126EUR/transactions/2021-07-01000000407/details",
+              "templated": "false"
+            },
+            "balances": {
+              "href": "/accounts/BE59001223710126EUR/balances",
+              "templated": "false"
+            },
+            "transactions": {
+              "href": "/accounts/BE59001223710126EUR/transactions",
+              "templated": "false"
+            },
+            "parent-list": {
+              "href": "/accounts",
+              "templated": "false"
+            }
+          }
+        }
+      },
+      "Detail": {
+        "description": "Detail of the transaction",
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/DetailLine"
+            },
+            "description": "Detail of the transaction",
+            "type": "array"
+          }
+        }
+      },
+      "DetailLine": {
+        "type": "string"
+      },
+      "TransactionDetailsLinks": {
+        "x-DefinitionType": "Hal",
+        "readOnly": true,
+        "description": "links that can be used for further navigation when browsing Account Information. Available links :\n- self: link to the transaction details\n- parent-list: link to the list of all available accounts\n- balances: link to the balances of the account\n- transactions : link to the transactions of the account\n",
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "transactions": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "balances": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "parent-list": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "type": "object",
+        "required": [
+          "self"
+        ]
+      },
+      "ErrorModel": {
+        "description": "Generic error report structure",
+        "type": "object",
+        "required": [
+          "status",
+          "message"
+        ],
+        "properties": {
+          "timestamp": {
+            "description": "current timestamp",
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "description": "HTTP error code",
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "description": "HTTP error text",
+            "type": "string",
+            "maxLength": 140
+          },
+          "message": {
+            "description": "HTTP textual reason phrase",
+            "type": "string",
+            "maxLength": 140
+          },
+          "path": {
+            "description": "Relevant path that was used",
+            "type": "string",
+            "maxLength": 140
+          }
+        },
+        "example": {
+          "timestamp": "2020-10-07T09:43:37+02:00",
+          "status": 400,
+          "error": "Bad Request",
+          "message": "Missing request header 'Digest' for method parameter of type String",
+          "path": "accounts"
+        }
+      },
+      "GenericLink": {
+        "description": "hypertext reference",
+        "type": "object",
+        "required": [
+          "href"
+        ],
+        "properties": {
+          "href": {
+            "description": "URI to be used",
+            "type": "string",
+            "maxLength": 140
+          },
+          "templated": {
+            "description": "specifies \"true\" if href is a URI template, i.e. with parameters. Otherwise, this property is absent or set to false",
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "href": "accounts/BE57001000000000EUR/balances"
+        }
+      },
+      "PsuContextLinks": {
+        "description": "Links that can be used for further navigation when browsing Account Information at top level\n- self: link to the list of all available accounts\n",
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "self"
+        ],
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "self": {
+            "href": "accounts"
+          }
+        }
+      },
+      "AccountLinks": {
+        "description": "links that can be used for further navigation when browsing Account Information at one account level\n- balances: link to the balances of a given account\n- transactions: link to the transactions of a given account\n",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "balances": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "transactions": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "balances": {
+            "href": "accounts/BE57001000000000EUR/balances"
+          },
+          "transactions": {
+            "href": "accounts/BE57001000000000EUR/transactions"
+          }
+        }
+      },
+      "BalancesLinks": {
+        "description": "links that can be used for further navigation when browsing Account Information at one account level\n- self: link to the balances of a given account\n- parent-list: link to the list of all available accounts\n- transactions: link to the transactions of a given account\n",
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "self"
+        ],
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "parent-list": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "transactions": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "self": {
+            "href": "/accounts/BE59001223710126EUR/balances",
+            "templated": "false"
+          },
+          "transactions": {
+            "href": "/accounts/BE59001223710126EUR/transactions",
+            "templated": "false"
+          },
+          "parent-list": {
+            "href": "/accounts",
+            "templated": "false"
+          }
+        }
+      },
+      "TransactionsLinks": {
+        "description": "links that can be used for further navigation when browsing Account Information at one account level\n- self: link to the transactions of a given account\n- parent-list: link to the list of all available accounts\n- balances: link to the balances of a given account\n- next: link to the next page of the transactions result\n",
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "self"
+        ],
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "parent-list": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "balances": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "self": {
+            "href": "/accounts/BE59001223710126EUR/transactions?dateFrom=2021-07-05&dateTo=2021-07-05",
+            "templated": "false"
+          },
+          "parent-list": {
+            "href": "/accounts",
+            "templated": "false"
+          },
+          "balances": {
+            "href": "/accounts/BE59001223710126EUR/balances",
+            "templated": "false"
+          }
+        }
+      },
+      "PaymentRequestLinks": {
+        "description": "links that can be used for further navigation when having post a Payment Request in order to get the relevant status report.\n",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          },
+          "confirmation": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "self": {
+            "href": "payment-requests/paymentRequestId/MyPmtInfRscId"
+          },
+          "confirmation": {
+            "href": "payment-requests/paymentRequestId/MyPmtInfRscId:confirmation"
+          }
+        }
+      },
+      "PaymentCoverageReportLinks": {
+        "description": "links that can be used for further navigation to post another coverage request.\n",
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "self"
+        ],
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "self": {
+            "href": "funds-confirmations"
+          }
+        }
+      },
+      "PaymentRequestResourceCreationLinks": {
+        "description": "links that can be used for further navigation, especially in REDIRECT approach <br> \n- In the consent approval href, for payment creation url will be \n  https://services.hellobank.be/HB/PSD2/Payment-Authorisation?paymentRequestResourceId=ac6cb3ffeea14c9eacb3ffeea1cc9e09&redirect_uri=http://myPisp/PaymentFailure\n- In the consent approval href, for payment cancellation url will be \n  https://services.hellobank.be/HB/PSD2/Payment-Cancellation?paymentRequestResourceId=ac6cb3ffeea14c9eacb3ffeea1cc9e09&redirect_uri=http://myPisp/PaymentFailure\n\n<ul>redirect_uri will be filled with the payment request unsuccessful report url. TPP as well overwrite in the consent approval url which will be used by the ASPSP for the redirection to TPP on or before payment validation </ul>",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "consentApproval": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "consentApproval": {
+            "href": "https://services.hellobank.be/HB/PSD2/Payment-Authorisation?paymentRequestResourceId=ac6cb3ffeea14c9eacb3ffeea1cc9e09&redirect_uri=http://myPisp/PaymentFailure"
+          }
+        }
+      },
+      "AppliedAuthenticationApproach": {
+        "description": "The ASPSP, based on the authentication approaches proposed by the PISP, choose the one that it can processed, in respect with the preferences and constraints of the PSU and indicates in this field which approach has been chosen\n",
+        "type": "string",
+        "enum": [
+          "REDIRECT"
+        ],
+        "readOnly": true,
+        "example": {
+          "appliedAuthenticationApproach": "REDIRECT"
+        }
+      },
+      "GenericIdentification": {
+        "description": "ISO20022: Unique identification of an account, a person or an organisation, as assigned by an issuer.\nAPI: The ASPSP will document which account reference type it will support.\n",
+        "type": "object",
+        "required": [
+          "identification",
+          "schemeName"
+        ],
+        "properties": {
+          "identification": {
+            "description": "API: Identifier Allowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,70})$"
+          },
+          "schemeName": {
+            "description": "Name of the identification scheme.\nPossible values for the scheme name, partially based on ISO20022 external code list, are the following: \n- BBAN (BasicBankAccountNumber) : BBAN cannot be used for a SEPA payment.\n- BANK (BankPartyIdentification): Unique and unambiguous assignment made by a specific bank or similar financial institution to identify a relationship as defined between the bank and its client. \n- COID (CountryIdentificationCode) : Country authority given organisation identification (e.g., corporate registration number)\n- SREN (SIREN): The SIREN number is a 9 digit code assigned by INSEE, the French National Institute for Statistics and Economic Studies, to identify an organisation in France.\n- SRET (SIRET): The SIRET number is a 14 digit code assigned by INSEE, the French National Institute for Statistics and Economic Studies, to identify an organisation unit in France. It consists of the SIREN number, followed by a five digit classification number, to identify the local geographical unit of that entity.\n- NIDN (NationalIdentityNumber): Number assigned by an authority to identify the national identity number of a person.\nOther values are also permitted, for instance:\n- OAUT (OAUTH2): OAUTH2 access token that is owned by the PISP being also an AISP and that can be used in order to identify the PSU\n- CPAN (CardPan): Card PAN\n- MPAN (MaskedPan): Masked PAN\n",
+            "type": "string",
+            "maxLength": 70
+          },
+          "issuer": {
+            "description": "ISO20022: Entity that assigns the identification. this could a country code or any organisation name or identifier that can be recognized by both parties Allowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,35})$"
+          }
+        },
+        "example": {
+          "identification": "12FR5",
+          "schemeName": "COID",
+          "issuer": "FR"
+        }
+      },
+      "AccountIdentification": {
+        "description": "Unique and unambiguous identification for the account between the account owner and the account servicer.",
+        "type": "object",
+        "properties": {
+          "iban": {
+            "$ref": "#/components/schemas/IBAN"
+          },
+          "other": {
+            "$ref": "#/components/schemas/GenericIdentification"
+          }
+        },
+        "example": {
+          "Iban": "BE22222222222222"
+        }
+      },
+      "AmountType": {
+        "description": "ISO20022: structure aiming to carry either an instructed amount or equivalent amount. Both structures embed the amount and the currency to be used.\n\nAPI: only instructed amount can be used\n",
+        "type": "object",
+        "required": [
+          "currency",
+          "amount"
+        ],
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "amount": {
+            "description": "ISO20022: Amount of money to be moved between the debtor and creditor, before deduction of charges, expressed in the currency as ordered by the initiating party.\n",
+            "type": "string",
+            "pattern": "^[-]{0,1}[0-9]{1,13}([.][0-9]{0,5}){0,1}$"
+          }
+        },
+        "example": {
+          "currency": "EUR",
+          "amount": "12.25"
+        }
+      },
+      "FinancialInstitutionIdentification": {
+        "description": "ISO20022: Unique and unambiguous identification of a financial institution, as assigned under an internationally recognised or proprietary identification scheme.\n",
+        "type": "object",
+        "properties": {
+          "bicFi": {
+            "description": "Business identification code (BIC)\".",
+            "type": "string",
+            "pattern": "^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the financial institution.\nAllowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected.\n",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,40})$"
+          },
+          "postalAddress": {
+            "$ref": "#/components/schemas/PostalAddress"
+          }
+        },
+        "example": {
+          "bicFi": "BNKAFRPPXXX"
+        }
+      },
+      "PostalAddress": {
+        "description": "ISO20022 : Information that locates and identifies a specific address, as defined by postal services.\n",
+        "type": "object",
+        "required": [
+          "country"
+        ],
+        "properties": {
+          "country": {
+            "description": "ISO20022: Country in which a person resides (the place of a person's home). In the case of a company, it is the country from which the affairs of that company are directed.\n",
+            "type": "string",
+            "pattern": "^([A-Z]{2,2})$"
+          },
+          "streetName": {
+            "description": "ISO20022: Name of a street or thoroughfare. Can be used for street, number and box. API: Cannot be used for SEPA payments.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,70})$"
+          },
+          "postCode": {
+            "description": "ISO20022: Identifier consisting of a group of letters and/or numbers that is added to a postal address to assist the sorting of mail. API: Cannot be used for SEPA payments.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,16})$"
+          },
+          "townName": {
+            "description": "ISO20022: Name of a built-up area, with defined boundaries, and a local government. API: Cannot be used for SEPA payments.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,35})$"
+          },
+          "addressLine": {
+            "description": "Unstructured address. The two lines must embed zip code and  town name. Allowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected.\n",
+            "type": "array",
+            "items": {
+              "description": "Address line",
+              "type": "string",
+              "maxItems": 2,
+              "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,70})$"
+            }
+          }
+        },
+        "example": {
+          "country": "FR",
+          "addressLine": [
+            "18 rue de la DSP2",
+            "75008 PARIS"
+          ]
+        }
+      },
+      "PartyIdentification": {
+        "description": "API : Description of a Party which can be either a person or an organization.\n",
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "description": "ISO20022: Name by which a party is known and which is usually used to identify that party.  Allowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected.\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,40})$"
+          },
+          "postalAddress": {
+            "$ref": "#/components/schemas/PostalAddress"
+          },
+          "organisationId": {
+            "$ref": "#/components/schemas/GenericIdentification"
+          },
+          "privateId": {
+            "$ref": "#/components/schemas/GenericIdentification"
+          }
+        },
+        "example": {
+          "name": "MyPreferedPisp",
+          "postalAddress": {
+            "country": "FR",
+            "addressLine": [
+              "18 rue de la DSP2",
+              "75008 PARIS"
+            ]
+          }
+        }
+      },
+      "ResourceId": {
+        "description": "API: Identifier assigned by the ASPSP for further use of the created resource through API calls\n",
+        "type": "string",
+        "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$",
+        "readOnly": true
+      },
+      "PaymentIdentification": {
+        "description": "ISO20022: Set of elements used to reference a payment instruction.\n",
+        "type": "object",
+        "required": [
+          "instructionId",
+          "endToEndId"
+        ],
+        "properties": {
+          "resourceId": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "instructionId": {
+            "description": "ISO20022: Unique identification as assigned by an instructing party for an instructed party to unambiguously identify the instruction.\n\nAPI: Unique identification shared between the PISP and the ASPSP \n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+          },
+          "endToEndId": {
+            "description": "ISO20022: Unique identification assigned by the initiating party to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain.\n\nAPI: Unique identification shared between the merchant and the PSU\n",
+            "type": "string",
+            "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+          }
+        },
+        "example": {
+          "resourceId": "MyInstrRscId",
+          "instructionId": "MyInstrId",
+          "endToEndId": "MyEndToEndId"
+        }
+      },
+      "PriorityCode": {
+        "description": "ISO20022: Indicator of the urgency or order of importance that the instructing party would like the instructed party to apply to the processing of the instruction.\n",
+        "type": "string",
+        "enum": [
+          "HIGH",
+          "NORM"
+        ]
+      },
+      "CategoryPurposeCode": {
+        "description": "ISO20022: Specifies the high level purpose of the instruction based on a set of pre-defined categories. This is used by the initiating party to provide information concerning the processing of the payment. It is likely to trigger special processing by any of the agents involved in the payment chain.\nThe following values are allowed:\n  SUPP (Supplier payment)\n  SSBE (Social security benefit)\n  SALA (Salary payment)\n  INTC (Intra Company Payment)\n  INTE (Interest)\n  TAXS (Tax payment)\n  DIVI (Dividend)\n  TREA (Treasury payment)\n  PENS (pension payment)\n",
+        "type": "string",
+        "enum": [
+          "SUPP",
+          "SSBE",
+          "SALA",
+          "INTC",
+          "INTE",
+          "TAXS",
+          "DIVI",
+          "TREA",
+          "PENS"
+        ]
+      },
+      "TransactionCategoryPurposeCode": {
+        "description": "ISO20022 : Category purpose of the transaction. Example of possible values :\n  SUPP (Supplier payment)\n  SSBE (Social security benefit)\n  SALA (Salary payment)\n  INTC (Intra Company Payment)\n  INTE (Interest)\n  TAXS (Tax payment)\n  DIVI (Dividend)\n  TREA (Treasury payment)\n  PENS (pension payment)\n",
+        "type": "string"
+      },
+      "ServiceLevelCode": {
+        "description": "ISO20022: Agreement under which or rules under which the transaction should be processed. Specifies a pre-agreed service or level of service between the parties, as published in an external service level code list.\nAPI: Only \"SEPA\" (SEPA Credit Transfer) is allowed\n",
+        "type": "string",
+        "enum": [
+          "SEPA"
+        ]
+      },
+      "LocalInstrumentCode": {
+        "description": "ISO20022: User community specific instrument. \nUsage: This element is used to specify a local instrument, local clearing option and/or further qualify the service or service level.\nAPI: Only \"INST\" value is allowed in order to ask for an SEPA instant Payment. Can only be used if ServiceLevel is equal to \"SEPA\"\n",
+        "type": "string",
+        "enum": [
+          "INST"
+        ]
+      },
+      "PaymentTypeInformation": {
+        "description": "ISO20022: Set of elements used to further specify the type of transaction.\n",
+        "type": "object",
+        "properties": {
+          "instructionPriority": {
+            "$ref": "#/components/schemas/PriorityCode"
+          },
+          "serviceLevel": {
+            "$ref": "#/components/schemas/ServiceLevelCode"
+          },
+          "localInstrument": {
+            "$ref": "#/components/schemas/LocalInstrumentCode"
+          },
+          "categoryPurpose": {
+            "$ref": "#/components/schemas/CategoryPurposeCode"
+          }
+        },
+        "example": {
+          "instructionPriority": "HIGH",
+          "serviceLevel": "SEPA",
+          "localInstrument": "INST",
+          "categoryPurpose": "SUPP"
+        }
+      },
+      "ChargeBearerCode": {
+        "description": "ISO20022: Specifies which party/parties will bear the charges associated with the processing of the payment transaction. \nAPI: The following values are allowed for Payment  Request\n  - SLEV:  Charges are to be applied following the rules agreed in the service level and/or scheme.\n  - SHAR: Charges are to be applied for both the debtor and creditor shared\n  - DEBT: Charges applied to debtor\n  - CRED: Charges applied to creditor\n",
+        "type": "string",
+        "enum": [
+          "SLEV",
+          "SHAR",
+          "DEBT",
+          "CRED"
+        ]
+      },
+      "PaymentInformationStatusCode": {
+        "description": "ISO20022: Specifies the status of the payment information.\nAPI: Mandatory. The following values are allowed to provide the status of the Payment Request\n  - ACCP (AcceptedCustomerProfile): Customer profile check was successful.\n  - ACSC (AcceptedSettlementCompleted): The payment initiation has been completed. Settlement on the debtor's account has been completed.\n  - ACSP (AcceptedSettlementInProcess): All required authentications have been provided and the payment has been sent for execution.\n  - ACTC (AcceptedTechnicalValidation): The payment initiation has been received and, syntactical and semantical validation are successful.\n - PDNG (Pending): The payment initiation needs authentications from multiple PSUs, where some but not yet all have been performed.\n  - RJCT (Rejected): The payment initiation has been rejected (either by the system or the PSU). Extra information about the rejection reason can be found at the payment request level (see field statusReasonInformation).\n",
+        "type": "string",
+        "enum": [
+          "ACCP",
+          "ACSC",
+          "ACSP",
+          "ACTC",
+          "PDNG",
+          "RJCT"
+        ]
+      },
+      "TransactionIndividualStatusCode": {
+        "description": "ISO20022: Specifies the status of the payment information group.\n\nAPI: Only the following values are allowed to provide the status of the subsequent CREDIT TRANSFER to the Payment Request\n- RJCT: Payment request or individual transaction included in the Payment Request has been rejected.\n- PDNG: (Pending): Payment request or individual transaction included in the Payment Request is pending. Further checks and status update will be performed.\n- ACSP: All preceding checks such as technical validation and customer profile were successful and therefore the Payment Request has been accepted for execution.\n- ACSC: Settlement on the debtor's account has been completed\n",
+        "type": "string",
+        "enum": [
+          "RJCT",
+          "PDNG",
+          "ACSP",
+          "ACSC"
+        ]
+      },
+      "StatusReasonInformation": {
+        "description": "ISO20022: Provides detailed information on the status reason.\n\nAPI: Can only be used in status equal to \"RJCT\". Only the following values are allowed:\n- AC01 (IncorectAccountNumber): the account number is either invalid or does not exist\n- AC04 (ClosedAccountNumber): the account is closed and cannot be used\n- AC06 (BlockedAccount): the account is blocked and cannot be used\n- AG01 (Transaction forbidden): Transaction forbidden on this type of account\n- AM18 (InvalidNumberOfTransactions): the number of transactions exceeds the ASPSP acceptance limit\n- CH03 (RequestedExecutionDateOrRequestedCollectionDateTooFarInFuture): The requested execution date is too far in the future\n- CUST (RequestedByCustomer): The reject is due to the debtor: refusal or lack of liquidity\n- DS02 (OrderCancelled): An authorized user has cancelled the order\n- FF01 (InvalidFileFormat): The reject is due to the original Payment Request which is invalid (syntax, structure or values)\n- FRAD (FraudulentOriginated): the Payment Request is considered as fraudulent\n- MS03 (NotSpecifiedReasonAgentGenerated): No reason specified by the ASPSP\n- NOAS (NoAnswerFromCustomer): The PSU has neither accepted nor rejected the Payment Request and a time-out has occurred\n- RR01 (MissingDebtorAccountOrIdentification): The Debtor account and/or Identification are missing or inconsistent \n- RR03 (MissingCreditorNameOrAddress): Specification of the creditor's name and/or address needed for regulatory requirements is insufficient or missing.\n- RR04 (RegulatoryReason): Reject from regulatory reason\n- RR12 (InvalidPartyID): Invalid or missing identification required within a particular country or payment type.\n",
+        "type": "string",
+        "enum": [
+          "AC01",
+          "AC04",
+          "AC06",
+          "AG01",
+          "CH03",
+          "CUST",
+          "DS02",
+          "FF01",
+          "FRAD",
+          "MS03",
+          "NOAS",
+          "RR01",
+          "RR03",
+          "RR04",
+          "RR12"
+        ]
+      },
+      "RequestedExecutionDate": {
+        "description": "ISO20022: Date (format: date-time without time-secfrac) at which the initiating party requests the clearing agent to process the payment. Example : 2020-10-07T09:43:37Z\nAPI:  \nThis date can be used in the following cases:\n- the single requested execution date for a payment having several instructions. In this case, this field must be set at the payment level. \n- the requested execution date for a given instruction within a payment. In this case, this field must be set at each instruction level. \n- The first date of execution for a standing order.\nWhen the payment cannot be processed at this date, the ASPSP is allowed to shift the applied execution date to the next possible execution date for non-standing orders.\n",
+        "type": "string",
+        "format": "date-time"
+      },
+      "EndDate": {
+        "description": "The last applicable day of execution (format: date-time without time-secfrac) for a given standing order. Example : 2020-10-07T09:43:37Z\n",
+        "type": "string",
+        "format": "date-time"
+      },
+      "FrequencyCode": {
+        "description": "Frequency rule for standing orders.\nThe following codes from the \"EventFrequency7Code\" of ISO 20022 are supported.\n- WEEK: Weekly\n- TOWK: EveryTwoWeeks\n- MNTH: Monthly\n- TOMN: EveryTwoMonths\n- QUTR: Quarterly\n- SEMI: SemiAnnual\n- YEAR: Annual\n",
+        "type": "string",
+        "enum": [
+          "WEEK",
+          "TOWK",
+          "MNTH",
+          "TOMN",
+          "QUTR",
+          "SEMI",
+          "YEAR"
+        ]
+      },
+      "PermanentLimitFrequencyCode": {
+        "type": "string",
+        "description": "Frequency rule for a permanent limit.\n- MNTH: Monthly\n",
+        "enum": [
+          "MNTH"
+        ]
+      },
+      "DayOfExecution": {
+        "description": "Day of the execution of a standing orders.  Week day is mandatory in case of weekly/bi-weekly frequency. End Of the month can only be used in  case of monthly/EveryTwoMonths/Quartely/SemiAnnual/Annual frequency.\nThe following codes are supported : - 01: Monday - 02: Tuesday - 03: Wednesday - 04: Thursday - 05: Friday - 31: End Of the month \n",
+        "type": "string",
+        "enum": [
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "31"
+        ]
+      },
+      "NumberOfOccurrences": {
+        "description": "Number of occurrences for a standing order. Either endDate or numberOfOccurrences can be filled. If endDate and numberOfOccurrences are not given, the standing order is considered as endless.\n",
+        "type": "integer",
+        "minimum": 2
+      },
+      "ExecutionRule": {
+        "description": "Execution date shifting rule for standing orders.\nThis data attribute defines the behaviour when recurring payment dates falls on a weekend or bank holiday.\nThis field is not supported and should not be used.\n",
+        "type": "string",
+        "enum": [
+          "FWNG",
+          "PREC"
+        ]
+      },
+      "CreditTransferTransaction": {
+        "description": "ISO20022: Payment processes required to transfer cash from the debtor to the creditor.\nAPI: \n",
+        "type": "object",
+        "required": [
+          "paymentId"
+        ],
+        "properties": {
+          "paymentId": {
+            "$ref": "#/components/schemas/PaymentIdentification"
+          },
+          "requestedExecutionDate": {
+            "$ref": "#/components/schemas/RequestedExecutionDate"
+          },
+          "endDate": {
+            "$ref": "#/components/schemas/EndDate"
+          },
+          "executionRule": {
+            "$ref": "#/components/schemas/ExecutionRule"
+          },
+          "dayOfExecution": {
+            "$ref": "#/components/schemas/DayOfExecution"
+          },
+          "numberOfOccurrences": {
+            "$ref": "#/components/schemas/NumberOfOccurrences"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/FrequencyCode"
+          },
+          "instructedAmount": {
+            "$ref": "#/components/schemas/AmountType"
+          },
+          "beneficiary": {
+            "$ref": "#/components/schemas/Beneficiary"
+          },
+          "remittanceInformation": {
+            "$ref": "#/components/schemas/RemittanceInformation"
+          },
+          "transactionStatus": {
+            "$ref": "#/components/schemas/TransactionIndividualStatusCode"
+          },
+          "statusReasonInformation": {
+            "$ref": "#/components/schemas/StatusReasonInformation"
+          },
+          "minimalAmount": {
+            "$ref": "#/components/schemas/AmountType"
+          }
+        },
+        "example": {
+          "paymentIdentification": {
+            "resourceId": "MyInstrRscId",
+            "instructionIdentification": "MyInstrId",
+            "endToEndIdentification": "MyEndToEndId"
+          },
+          "requestedExecutionDate": "2020-10-07T09:43:37Z",
+          "instructedAmount": {
+            "currency": "EUR",
+            "amount": "124.35"
+          },
+          "remittanceInformation": {
+            "structured": [
+              {
+                "creditorReferenceInformation": {
+                  "type": {
+                    "code": "SCOR",
+                    "issuer": "BBA"
+                  },
+                  "reference": "123456789123"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "SupplementaryData": {
+        "description": "ISO20022: Additional information that cannot be captured in the structured elements and/or any other specific block.\n\nAPI: This structure is used to embed the relevant URLs for returning the status report to the PISP and to specify which authentication approaches are accepted by the PISP and which has been chosen by the ASPSP\n",
+        "type": "object",
+        "properties": {
+          "acceptedAuthenticationApproach": {
+            "description": "can only be set by the PISP\nauthentication approaches that are supported by the PISP. The PISP can provide several choices separated by commas. \nREDIRECT: the PSU is redirected by the TPP to the ASPSP which processes identification and authentication\nDECOUPLED: the TPP identifies the PSU and forwards the identification to the ASPSP which processes the authentication through a decoupled device\nEMBEDDED: the TPP identifies the PSU and forwards the identification to the ASPSP which starts the authentication. The TPP forwards one authentication factor of the PSU (e.g. OTP or response to a challenge)  \n",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "combination of possible values for authentication approaches",
+              "enum": [
+                "REDIRECT"
+              ]
+            }
+          },
+          "appliedAuthenticationApproach": {
+            "$ref": "#/components/schemas/AppliedAuthenticationApproach"
+          },
+          "successfulReportUrl": {
+            "description": "URL to be used by the ASPSP in order to notify the PISP of the finalisation of the authentication and consent process in REDIRECT and DECOUPLED approach\n",
+            "type": "string"
+          },
+          "unsuccessfulReportUrl": {
+            "description": "URL to be used by the ASPSP in order to notify the PISP of the failure of the authentication and consent process in REDIRECT and DECOUPLED approach \nIf this URL is not provided by the PISP, the ASPSP will use the \"successfulReportUrl\" even in case of failure of the Payment Request processing\n",
+            "type": "string"
+          }
+        },
+        "example": {
+          "successfulReportUrl": "http://myPisp/PaymentSuccess",
+          "unsuccessfulReportUrl": "http://myPisp/PaymentFailure"
+        }
+      },
+      "BalanceStatus": {
+        "description": "Type of balance\n- CLBD: (ISO20022 ClosingBooked) Accounting Balance\n- XPCD: (ISO20022 Expected) Instant Balance\n- ITAV: (ISO20022 Interim Available) Available balance \n - PRCD: Last closing balance\n- OTHR: Other Balance\n",
+        "type": "string",
+        "enum": [
+          "CLBD",
+          "XPCD",
+          "ITAV",
+          "PRCD",
+          "OTHR"
+        ]
+      },
+      "TransactionStatus": {
+        "description": "Type of Transaction\n- BOOK: (ISO20022 ClosingBooked) Accounted transaction\n- PDNG: (ISO20022 Expected) Instant Balance Transaction\n- RJCT: (ISO20022 Rejected) Rejected transaction\n- FUTR: Future transactions\n- RESV: Reserved transaction\n- OTHR: Other \n",
+        "type": "string",
+        "enum": [
+          "BOOK",
+          "PDNG",
+          "RJCT",
+          "FUTR",
+          "RESV",
+          "OTHR"
+        ]
+      },
+      "Transaction": {
+        "description": "structure of a transaction",
+        "type": "object",
+        "required": [
+          "transactionAmount",
+          "status",
+          "creditDebitIndicator",
+          "bookingDate"
+        ],
+        "properties": {
+          "resourceId": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "entryReference": {
+            "type": "string",
+            "description": "Technical incremental identification of the transaction.\n",
+            "maxLength": 40
+          },
+          "transactionAmount": {
+            "$ref": "#/components/schemas/AmountType"
+          },
+          "creditDebitIndicator": {
+            "$ref": "#/components/schemas/CreditDebitIndicator"
+          },
+          "transactionAmountDetails": {
+            "$ref": "#/components/schemas/AmountAndCurrencyExchange"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "bookingDate": {
+            "description": "Booking date of the transaction on the account (central european Timezone)",
+            "type": "string",
+            "format": "date"
+          },
+          "valueDate": {
+            "description": "Value date of the transaction on the account (central european timezone)",
+            "type": "string",
+            "format": "date"
+          },
+          "transactionDate": {
+            "description": "Date used for specific purposes (central european timezone): \n- for card transaction: date of the transaction\n- for credit transfer: acquiring date of the transaction\n- for direct debit: receiving date of the transaction\n",
+            "type": "string",
+            "format": "date"
+          },
+          "bankTransactionCode": {
+            "$ref": "#/components/schemas/BankTransactionCode"
+          },
+          "relatedParties": {
+            "$ref": "#/components/schemas/RelatedParties"
+          },
+          "transactionCategoryPurpose": {
+            "$ref": "#/components/schemas/TransactionCategoryPurposeCode"
+          },
+          "remittanceInformation": {
+            "$ref": "#/components/schemas/RemittanceInformation"
+          },
+          "additionalTransactionInformation": {
+            "$ref": "#/components/schemas/AdditionalTransactionInformation"
+          },
+          "details": {
+            "$ref": "#/components/schemas/GenericLink"
+          }
+        },
+        "example": {
+          "resourceId": "BE59001223710126EUR",
+          "transactionAmount": {
+            "currency": "EUR",
+            "amount": "-25.05"
+          },
+          "creditDebitIndicator": "DBIT",
+          "transactionAmountDetails": {
+            "bookedAmount": {
+              "amount": {
+                "currency": "EUR",
+                "amount": "-25.05"
+              }
+            }
+          },
+          "status": "RJCT",
+          "bookingDate": "2021-07-05",
+          "transactionDate": "2021-06-25",
+          "bankTransactionCode": {
+            "domain": "PMNT",
+            "family": "ICCN",
+            "subFamily": "ICCT"
+          },
+          "transactionCategoryPurpose": "INTC",
+          "additionalTransactionInformation": {
+            "statementReference": "2021",
+            "eodOperationReference": "8677",
+            "refusal": {
+              "reason": "Contact your relationship manager or branch for more information"
+            }
+          },
+          "relatedParties": {
+            "creditorAccount": {
+              "iban": "BE07221108900966"
+            },
+            "creditor": {
+              "name": "MBN BE"
+            },
+            "creditorAgent": {
+              "bicFi": "GEBABEBB"
+            }
+          },
+          "remittanceInformation": {
+            "unstructured": [
+              "PT01FP1201651201651201009103000201009"
+            ]
+          },
+          "narrative": [
+            "MBN BE",
+            "REFERENCE BANQUE : 2107050915268675"
+          ]
+        }
+      },
+      "AccountResource": {
+        "description": "PSU account that is made available to the TPP\n",
+        "type": "object",
+        "required": [
+          "name",
+          "cashAccountType",
+          "currency",
+          "_links"
+        ],
+        "properties": {
+          "resourceId": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "bicFi": {
+            "description": "ISO20022: Code allocated to a financial institution by the ISO 9362 Registration Authority as described in ISO 9362 \"Banking - Banking telecommunication messages - Business identification code (BIC)\".\n",
+            "type": "string",
+            "pattern": "^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$"
+          },
+          "accountId": {
+            "$ref": "#/components/schemas/AccountIdentification"
+          },
+          "name": {
+            "description": "Label of the PSU account\nIn case of a delayed debit card transaction set, the name shall specify the holder name and the imputation date\n",
+            "type": "string",
+            "maxLength": 70
+          },
+          "usage": {
+            "description": "Specifies the usage of the account\n- PRIV: private personal account\n- ORGA: professional account\n",
+            "type": "string",
+            "enum": [
+              "PRIV",
+              "ORGA"
+            ]
+          },
+          "cashAccountType": {
+            "description": "Specifies the type of the account\n- CACC: Cash account\n",
+            "type": "string",
+            "enum": [
+              "CACC"
+            ]
+          },
+          "product": {
+            "description": "Product Name of the Bank for this account, proprietary definition\n",
+            "type": "string",
+            "maxLength": 35
+          },
+          "currency": {
+            "description": "Currency used for the account",
+            "type": "string",
+            "maxLength": 3
+          },
+          "psuStatus": {
+            "description": "The relationship between the PSU and the account.",
+            "type": "string",
+            "maxLength": 35
+          },
+          "_links": {
+            "$ref": "#/components/schemas/AccountLinks"
+          }
+        },
+        "example": {
+          "resourceId": "BE59001003710126EUR",
+          "bicFi": "GEBABEBB",
+          "accountId": {
+            "iban": "BE59001223710126"
+          },
+          "name": "DE BRIJ",
+          "usage": "PRIV",
+          "cashAccountType": "CACC",
+          "product": "Premium Pack",
+          "currency": "EUR",
+          "psuStatus": "Holder",
+          "_links": {
+            "transactions": {
+              "href": "/accounts/BE59001223710126EUR/transaction",
+              "templated": "false"
+            }
+          }
+        }
+      },
+      "BalanceResource": {
+        "description": "Structure of an account balance",
+        "type": "object",
+        "required": [
+          "name",
+          "balanceAmount",
+          "balanceType"
+        ],
+        "properties": {
+          "name": {
+            "description": "Label of the balance",
+            "type": "string",
+            "maxLength": 70
+          },
+          "balanceAmount": {
+            "$ref": "#/components/schemas/AmountType"
+          },
+          "balanceType": {
+            "$ref": "#/components/schemas/BalanceStatus"
+          },
+          "referenceDate": {
+            "description": "Reference date for the balance",
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "example": {
+          "name": "Closing balance",
+          "balanceAmount": {
+            "currency": "EUR",
+            "amount": "958.440"
+          },
+          "balanceType": "CLBD",
+          "referenceDate": "2019-04-02T00:00:00.000Z"
+        }
+      },
+      "PaymentInformationId": {
+        "description": "ISO20022 : Reference assigned by a sending party to unambiguously identify the payment information block within the message.\n",
+        "type": "string",
+        "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+      },
+      "CreationDateTime": {
+        "description": "ISO20022: Date and time (format: date-time without time-secfrac) at which a (group of) payment instruction(s) was created by the instructing party.Example : 2020-10-07T09:43:37Z\n",
+        "type": "string",
+        "format": "date-time"
+      },
+      "FundsAvailabilityInformation": {
+        "description": "This flag indicates if there was enough funds available on the payment account in order to cover the payment request at payment authorisation (last signature required has been provided).\n\n  - true: the payment can be covered\n  - false: the payment cannot be covered\n\nPlease note that this flag is not made available in case of :\n  - Future date payment \n  - Standing Order Payment\n  - Payment request rejection not linked to the funds availability.\n",
+        "type": "boolean",
+        "readOnly": true
+      },
+      "BookingInformation": {
+        "description": "indicator that the payment can be immediately booked or not\n- true: payment is booked\n- false: payment is not booked\n",
+        "type": "boolean",
+        "readOnly": true
+      },
+      "PaymentRequestResource": {
+        "description": "ISO20022: The PaymentRequestResource message is sent by the Creditor sending party to the Debtor receiving party, directly or through agents. It is used by a Creditor to request movement of funds from the debtor account to a creditor.\nAPI: \nInformation about the creditor (Id, account and agent) might be placed either at payment level or at instruction level. Thus multi-beneficiary payments can be handled.\nThe requested execution date can be placed either at payment level when all instructions are requested to be executed at the same date or at instruction level.\nThe latest case includes:\n- multiple instructions having different requested execution dates\n- standing orders settings \n",
+        "type": "object",
+        "required": [
+          "paymentInformationId",
+          "creationDateTime",
+          "numberOfTransactions",
+          "initiatingParty",
+          "paymentTypeInformation",
+          "beneficiary",
+          "creditTransferTransaction",
+          "supplementaryData"
+        ],
+        "properties": {
+          "resourceId": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "paymentInformationId": {
+            "$ref": "#/components/schemas/PaymentInformationId"
+          },
+          "creationDateTime": {
+            "$ref": "#/components/schemas/CreationDateTime"
+          },
+          "numberOfTransactions": {
+            "description": "ISO20022: Number of individual transactions contained in the message.\nAPI: Each ASPSP will specify a maximum value for this field taking into accounts its specificities about payment request handling\n",
+            "type": "integer",
+            "minimum": 1
+          },
+          "initiatingParty": {
+            "$ref": "#/components/schemas/PartyIdentification"
+          },
+          "paymentTypeInformation": {
+            "$ref": "#/components/schemas/PaymentTypeInformation"
+          },
+          "debtor": {
+            "$ref": "#/components/schemas/PartyIdentification"
+          },
+          "debtorAccount": {
+            "$ref": "#/components/schemas/DebtorAccountIdentificationCurrency"
+          },
+          "debtorAgent": {
+            "$ref": "#/components/schemas/FinancialInstitutionIdentification"
+          },
+          "beneficiary": {
+            "$ref": "#/components/schemas/Beneficiary"
+          },
+          "chargeBearer": {
+            "$ref": "#/components/schemas/ChargeBearerCode"
+          },
+          "paymentInformationStatus": {
+            "$ref": "#/components/schemas/PaymentInformationStatusCode"
+          },
+          "statusReasonInformation": {
+            "$ref": "#/components/schemas/StatusReasonInformation"
+          },
+          "fundsAvailability": {
+            "$ref": "#/components/schemas/FundsAvailabilityInformation"
+          },
+          "booking": {
+            "$ref": "#/components/schemas/BookingInformation"
+          },
+          "requestedExecutionDate": {
+            "description": "ISO20022:Date (format: date-time without time-secfrac) at which the initiating party requests the clearing agent to process the payment. Example : 2020-10-07T09:43:37Z  \n",
+            "type": "string",
+            "format": "date-time"
+          },
+          "creditTransferTransaction": {
+            "description": "ISO20022: Payment processes required to transfer cash from the debtor to the creditor.\nAPI: Each ASPSP will specify a maxItems value for this field taking into accounts its specificities about payment request handling\n",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/CreditTransferTransaction"
+            }
+          },
+          "supplementaryData": {
+            "$ref": "#/components/schemas/SupplementaryData"
+          }
+        },
+        "example": {
+          "paymentInformationId": "MyPmtInfId",
+          "creationDateTime": "2020-06-17T11:41:42Z",
+          "requestedExecutionDate": "2020-06-17T22:41:42Z",
+          "numberOfTransactions": 1,
+          "initiatingParty": {
+            "name": "MyPreferedPisp"
+          },
+          "paymentTypeInformation": {
+            "serviceLevel": "SEPA"
+          },
+          "beneficiary": {
+            "creditor": {
+              "name": "myMerchant",
+              "postalAddress": {
+                "country": "BE",
+                "addressLine": [
+                  "Rue de Anvers 4",
+                  "1000 Brussels"
+                ]
+              }
+            },
+            "creditorAccount": {
+              "iban": "BE51918322770662"
+            }
+          },
+          "creditTransferTransaction": [
+            {
+              "paymentId": {
+                "instructionId": "MyInstrId",
+                "endToEndId": "MyEndToEndId"
+              },
+              "instructedAmount": {
+                "currency": "EUR",
+                "amount": "24.35"
+              },
+              "remittanceInformation": {
+                "unstructured": [
+                  "myRemittanceInformation"
+                ]
+              }
+            }
+          ],
+          "supplementaryData": {
+            "acceptedAuthenticationApproach": [
+              "REDIRECT"
+            ],
+            "successfulReportUrl": "http://myPisp/PaymentSuccess",
+            "unsuccessfulReportUrl": "http://myPisp/PaymentFailure"
+          }
+        }
+      },
+      "PaymentCoverageRequestResource": {
+        "description": "Payment coverage request structure. The request must rely either on a cash account or a payment card.",
+        "type": "object",
+        "required": [
+          "paymentCoverageRequestId",
+          "instructedAmount",
+          "accountId"
+        ],
+        "properties": {
+          "paymentCoverageRequestId": {
+            "description": "Identification of the payment Coverage Request",
+            "type": "string",
+            "maxLength": 35
+          },
+          "payee": {
+            "description": "The merchant where the card is accepted as information to the PSU.",
+            "type": "string",
+            "maxLength": 70
+          },
+          "instructedAmount": {
+            "$ref": "#/components/schemas/AmountType"
+          },
+          "accountId": {
+            "$ref": "#/components/schemas/AccountIdentificationCurrency"
+          }
+        },
+        "example": {
+          "paymentCoverageRequestId": "MyCoverage123456",
+          "instructedAmount": {
+            "currency": "EUR",
+            "amount": "12345"
+          },
+          "accountId": {
+            "currency": "EUR",
+            "iban": "BE22222222222222"
+          }
+        }
+      },
+      "HalAccounts": {
+        "description": "HYPERMEDIA structure used for returning the list of the available accounts to the AISP",
+        "type": "object",
+        "required": [
+          "accounts",
+          "_links"
+        ],
+        "properties": {
+          "accounts": {
+            "description": "List of PSU account that are made available to the TPP\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountResource"
+            }
+          },
+          "_links": {
+            "$ref": "#/components/schemas/PsuContextLinks"
+          }
+        }
+      },
+      "HalBalances": {
+        "description": "HYPERMEDIA structure used for returning the list of the relevant balances for a given account to the AISP",
+        "properties": {
+          "balances": {
+            "items": {
+              "$ref": "#/components/schemas/BalanceResource"
+            },
+            "description": "List of account balances",
+            "minItems": 1,
+            "type": "array",
+            "example": [
+              {
+                "name": "Closing balance",
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "0.60"
+                },
+                "balanceType": "CLBD",
+                "referenceDate": "2021-07-06"
+              },
+              {
+                "name": "Operational balance",
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "0.80"
+                },
+                "balanceType": "OTHR",
+                "referenceDate": "2021-07-06"
+              },
+              {
+                "name": "Available balance",
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "0.80"
+                },
+                "balanceType": "ITAV",
+                "referenceDate": "2021-07-06"
+              }
+            ]
+          },
+          "_links": {
+            "$ref": "#/components/schemas/BalancesLinks"
+          }
+        },
+        "required": [
+          "balances",
+          "_links"
+        ]
+      },
+      "HalTransactions": {
+        "description": "HYPERMEDIA structure used for returning the list of the transactions for a given account to the AISP",
+        "type": "object",
+        "required": [
+          "transactions",
+          "_links"
+        ],
+        "properties": {
+          "transactions": {
+            "description": "List of transactions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "_links": {
+            "$ref": "#/components/schemas/TransactionsLinks"
+          }
+        }
+      },
+      "HalPaymentRequest": {
+        "description": "HYPERMEDIA structure used for returning the original Payment Request to the PISP",
+        "type": "object",
+        "required": [
+          "paymentRequest",
+          "_links"
+        ],
+        "properties": {
+          "paymentRequest": {
+            "$ref": "#/components/schemas/PaymentRequestResource"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/PaymentRequestLinks"
+          }
+        }
+      },
+      "HalPaymentRequestCreation": {
+        "description": "data forwarded by the ASPSP top the PISP after creation / cancellation of the Payment Request resource creation\n",
+        "type": "object",
+        "properties": {
+          "appliedAuthenticationApproach": {
+            "$ref": "#/components/schemas/AppliedAuthenticationApproach"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/PaymentRequestResourceCreationLinks"
+          }
+        }
+      },
+      "HalPaymentCoverageReport": {
+        "description": "HYPERMEDIA structure used for returning the payment coverage report to the CBPII",
+        "type": "object",
+        "required": [
+          "request",
+          "result",
+          "_links"
+        ],
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/PaymentCoverageRequestResource"
+          },
+          "result": {
+            "description": "Result of the coverage check :\n- true: the payment can be covered\n- false: the payment cannot be covered\n",
+            "type": "boolean"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/PaymentCoverageReportLinks"
+          }
+        }
+      },
+      "Beneficiary": {
+        "description": "Specification of a beneficiary",
+        "type": "object",
+        "required": [
+          "creditor",
+          "creditorAccount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the beneficiary",
+            "pattern": "^([-a-zA-Z0-9 /?:().,']{1,35})$"
+          },
+          "creditorAgent": {
+            "$ref": "#/components/schemas/FinancialInstitutionIdentification"
+          },
+          "creditor": {
+            "$ref": "#/components/schemas/PartyIdentification"
+          },
+          "creditorAccount": {
+            "$ref": "#/components/schemas/AccountIdentification"
+          }
+        }
+      },
+      "RemittanceInformation": {
+        "description": "ISO20022: Information supplied to enable the matching of an entry with the items that the transfer is intended to settle, such as commercial invoices in an accounts' receivable system.\nAPI: |\n  Only one occurrence of the unstructured information is allowed.\n  Only one occurrence of the structured information is allowed.\n  Structured and unstructured information cannot coexist.\n",
+        "type": "object",
+        "properties": {
+          "unstructured": {
+            "type": "array",
+            "description": "Unstructured remittance information",
+            "items": {
+              "type": "string",
+              "description": "ISO20022: Information supplied to enable the matching of an entry with the items that the transfer is intended to settle, such as commercial invoices in an accounts' receivable system.  Allowed Characters will be as per the given pattern. Characters with accent like àäáçèëéï öóòüùú and all small letters will be replaced by capital letters without accent. All other characters like (µ$£ Æ Ð × Ø Þ ß æ ÷ ø) will be blocked and payment request will be rejected. API: Only one occurrence is allowed\n",
+              "title": "remittanceLine",
+              "pattern": "^([-a-zA-Z0-9?:'/()+, .áâäàåãÄÅÁÂÀÃÇçêëèéÊËÈÉïîìíÍÎÏÌôöòõóÓÖÔÒÕûùúüÚÛÙÜñÑýÝÿ]{1,140})$"
+            }
+          },
+          "structured": {
+            "description": "Structured remittance information",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StructuredRemittanceInformation"
+            }
+          }
+        }
+      },
+      "AmountAndCurrencyExchange": {
+        "description": "Provides detailed information on the original amount.",
+        "type": "object",
+        "properties": {
+          "bookedAmount": {
+            "$ref": "#/components/schemas/AmountAndCurrencyExchangeDetails"
+          }
+        }
+      },
+      "AmountAndCurrencyExchangeDetails": {
+        "description": "details on amount and currency exchange\n",
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountType"
+          },
+          "exchangeRate": {
+            "description": "Factor used to convert an amount from one currency into another. This reflects the price at which one currency was bought with another currency.\nExchangerate that was used between transactioncurrency and counter value amount currency (booked currency).\n",
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "AccountIdentificationCurrency": {
+        "description": "Unique and unambiguous identification for the account between the account owner and the account servicer.",
+        "type": "object",
+        "properties": {
+          "iban": {
+            "$ref": "#/components/schemas/IBAN"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        },
+        "required": [
+          "iban"
+        ],
+        "example": {
+          "iban": "BE95639865714329",
+          "currency": "EUR"
+        }
+      },
+      "StructuredRemittanceInformation": {
+        "description": "Information supplied to enable the matching/reconciliation of an entry with the items that the payment is intended to settle, in a structured form.\nOly creditor reference information is supported.\n",
+        "type": "object",
+        "properties": {
+          "creditorReferenceInformation": {
+            "$ref": "#/components/schemas/CreditorReferenceInformation"
+          }
+        }
+      },
+      "CreditorReferenceInformation": {
+        "description": "Reference information provided by the creditor to allow the identification of the underlying documents.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/CodeAndIssuer"
+          },
+          "reference": {
+            "description": "Unique reference, as assigned by the creditor, to unambiguously refer to the payment transaction.",
+            "type": "string",
+            "maxLength": 35,
+            "example": "123456789012",
+            "pattern": "^([a-zA-Z0-9]{1,35})$"
+          }
+        }
+      },
+      "CodeAndIssuer": {
+        "description": "Specifies a code and the issuer of this code.\n",
+        "type": "object",
+        "required": [
+          "code",
+          "issuer"
+        ],
+        "properties": {
+          "code": {
+            "description": "Provides the code. Only Structured Communication Reference is allowed",
+            "type": "string",
+            "example": "SCOR",
+            "enum": [
+              "SCOR"
+            ]
+          },
+          "issuer": {
+            "description": "Identification of the issuer of the code. Only Belgian and European structured communication can be used. For Belgium structure, the issuer will be BBA For European structure, the issue will be ISO\n",
+            "type": "string",
+            "example": "BBA",
+            "enum": [
+              "BBA",
+              "ISO"
+            ]
+          }
+        }
+      },
+      "AdditionalTransactionInformation": {
+        "description": "Additional information specific to the bank",
+        "type": "object",
+        "properties": {
+          "statementReference": {
+            "type": "string",
+            "description": "Transaction statement reference."
+          },
+          "eodOperationReference": {
+            "type": "string",
+            "description": "Transaction reference."
+          },
+          "endToEndReference": {
+            "type": "string",
+            "description": "SEPA end to end reference."
+          },
+          "mandateReference": {
+            "type": "string",
+            "description": "SEPA mandate reference."
+          },
+          "atmPosName": {
+            "type": "string",
+            "description": "Location payment/cash-withdrawel."
+          },
+          "cardNumber": {
+            "type": "string",
+            "description": "Card number used for payment or cash-out."
+          },
+          "refusal": {
+            "type": "object",
+            "description": "Rejected transaction information",
+            "properties": {
+              "reason": {
+                "type": "string",
+                "description": "Reason of the rejected transaction"
+              }
+            }
+          },
+          "narrative": {
+            "items": {
+              "$ref": "#/components/schemas/Line"
+            },
+            "description": "Description of the transaction. This is the most complete description of a transac. The field is formatted and contains a maximum of 19 lines.",
+            "type": "array"
+          },
+          "transactionResourceId": {
+            "$ref": "#/components/schemas/TransactionResourceId"
+          }
+        }
+      },
+      "Line": {
+        "description": "Textline of the narrative (= extensive description transaction)",
+        "type": "string"
+      },
+      "TransactionResourceId": {
+        "description": "Transaction resource identification to be used to retrieve the transaction details",
+        "type": "string"
+      },
+      "BankTransactionCode": {
+        "description": "ISO20022 Bank Transaction Codification.\n   \n",
+        "type": "object",
+        "required": [
+          "domain",
+          "family",
+          "subFamily"
+        ],
+        "properties": {
+          "domain": {
+            "description": "Domain of the bank transaction code, in a structured and hierarchical format.  \n",
+            "type": "string",
+            "maxLength": 4
+          },
+          "family": {
+            "description": "Family of the bank transaction code, within a specific domain, in a structured and hierarchical format.\n",
+            "type": "string",
+            "maxLength": 4
+          },
+          "subFamily": {
+            "description": "Sub-family of the bank transaction code,\nwithin a specific domain, in a structured and hierarchical format.\n",
+            "type": "string",
+            "maxLength": 4
+          }
+        }
+      },
+      "RelatedParties": {
+        "description": "information about the parties that are related to the transaction",
+        "type": "object",
+        "properties": {
+          "debtorAgent": {
+            "$ref": "#/components/schemas/FinancialInstitutionIdentification"
+          },
+          "debtor": {
+            "$ref": "#/components/schemas/PartyIdentification"
+          },
+          "debtorAccount": {
+            "$ref": "#/components/schemas/AccountIdentification"
+          },
+          "creditorAgent": {
+            "$ref": "#/components/schemas/FinancialInstitutionIdentification"
+          },
+          "creditor": {
+            "$ref": "#/components/schemas/PartyIdentification"
+          },
+          "creditorAccount": {
+            "$ref": "#/components/schemas/AccountIdentification"
+          }
+        }
+      },
+      "DebtorAccountIdentificationCurrency": {
+        "description": "Unique and unambiguous identification for the account between the account owner and the account servicer.",
+        "type": "object",
+        "properties": {
+          "iban": {
+            "$ref": "#/components/schemas/IBAN"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "other": {
+            "$ref": "#/components/schemas/GenericIdentification"
+          }
+        },
+        "example": {
+          "Iban": "BE12345123451624"
+        }
+      },
+      "CreditDebitIndicator": {
+        "description": "Accounting flow of the transaction\n- CRDT: Credit type transaction\n- DBIT: Debit type transaction\n",
+        "enum": [
+          "CRDT",
+          "DBIT"
+        ],
+        "type": "string"
+      },
+      "FilePaymentRequest": {
+        "description": "The file payment request\n",
+        "type": "object",
+        "properties": {
+          "requestedExecutionDate": {
+            "$ref": "#/components/schemas/RequestedExecutionDate"
+          },
+          "fileName": {
+            "$ref": "#/components/schemas/FileName"
+          },
+          "fileContent": {
+            "$ref": "#/components/schemas/FileContent"
+          },
+          "fileType": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "supplementaryData": {
+            "$ref": "#/components/schemas/FileSupplementaryData"
+          }
+        },
+        "required": [
+          "fileName",
+          "requestedExecutionDate",
+          "fileContent",
+          "supplementaryData",
+          "fileType"
+        ]
+      },
+      "FilePaymentResource": {
+        "description": "The file payment resource\n",
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "$ref": "#/components/schemas/FileName"
+          },
+          "requestedExecutionDate": {
+            "$ref": "#/components/schemas/RequestedExecutionDate"
+          },
+          "fileContent": {
+            "$ref": "#/components/schemas/FileContent"
+          },
+          "fileType": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "resourceId": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "paymentInformationStatus": {
+            "$ref": "#/components/schemas/PaymentInformationStatusCode"
+          },
+          "statusReasonInformation": {
+            "$ref": "#/components/schemas/StatusReasonInformation"
+          },
+          "supplementaryData": {
+            "$ref": "#/components/schemas/FileSupplementaryData"
+          }
+        },
+        "required": [
+          "fileName",
+          "requestedExecutionDate",
+          "fileContent",
+          "supplementaryData",
+          "resourceId",
+          "paymentInformationStatus",
+          "fileType"
+        ]
+      },
+      "FileName": {
+        "description": "The name of the file payment.",
+        "type": "string",
+        "pattern": "^([ a-zA-Z0-9%._-]{1,76})$"
+      },
+      "FileType": {
+        "description": "The type of the file payment.",
+        "type": "string",
+        "enum": [
+          "XML"
+        ]
+      },
+      "FileContent": {
+        "type": "string",
+        "description": "The XML string of the file content (PAIN.001.001.02/PAIN.001.001.03) with maximum size of 10485760 Bytes (10 MB) in base64-encoded characters."
+      },
+      "FileSupplementaryData": {
+        "description": "ISO20022: Additional information that cannot be captured in the structured elements and/or any other specific block.\n",
+        "properties": {
+          "unsuccessfulReportUrl": {
+            "description": "URL to be used by the ASPSP in order to notify the PISP of the failure of the authentication and consent process in REDIRECT  approach\nIf this URL is not provided by the PISP, the ASPSP will use the \"successfulReportUrl\" even in case of failure of the Payment Request processing\n",
+            "type": "string"
+          },
+          "successfulReportUrl": {
+            "description": "URL to be used by the ASPSP in order to notify the PISP of the finalisation of the authentication and consent process in REDIRECT approach\n",
+            "type": "string"
+          },
+          "acceptedAuthenticationApproach": {
+            "items": {
+              "description": "Only REDIRECT is supported",
+              "enum": [
+                "REDIRECT"
+              ],
+              "type": "string"
+            },
+            "description": "can only be set by the PISP\nauthentication approaches that are supported by the PISP. \nREDIRECT: the PSU is redirected by the TPP to the ASPSP which processes identification and authentication\n",
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "required": [
+          "successfulReportUrl",
+          "acceptedAuthenticationApproach"
+        ]
+      },
+      "HalFilePaymentRequestCreation": {
+        "description": "data forwarded by the ASPSP top the PISP after creation of the Payment Request resource creation\n",
+        "properties": {
+          "appliedAuthenticationApproach": {
+            "$ref": "#/components/schemas/FileAppliedAuthenticationApproach"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/PaymentRequestResourceCreationLinks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "appliedAuthenticationApproach",
+          "_links"
+        ]
+      },
+      "FileAppliedAuthenticationApproach": {
+        "description": "Applied authentification approch for the file payment initation.\n",
+        "enum": [
+          "REDIRECT"
+        ],
+        "type": "string"
+      },
+      "IBAN": {
+        "description": "ISO20022: International Bank Account Number (IBAN) - identification used internationally by financial institutions to uniquely identify the account of a customer. \n\nFurther specifications of the format and content of the IBAN can be found in the standard ISO 13616 \"Banking and related financial services - International Bank Account Number (IBAN)\" version 1997-10-01, or later revisions.\n",
+        "type": "string",
+        "pattern": "^[A-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,34}$"
+      },
+      "Currency": {
+        "description": "Specifies the currency of the amount. A code allocated to a currency by a Maintenance Agency under an international identification scheme, as described in the latest edition of the international standard ISO 4217 \"Codes for the representation of currencies and funds\". \n",
+        "type": "string",
+        "pattern": "^[A-Z]{3,3}$"
+      }
+    }
+  }
+}
