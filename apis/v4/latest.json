@@ -1,0 +1,2974 @@
+{
+	"info": {
+		"_postman_id": "ec6627b7-5c8c-4570-83c6-f0204d565cba",
+		"name": "SANDBOX_STET_V4_COLLECTION (latest)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ACCOUNT INFORMATION API (AISP)",
+			"item": [
+				{
+					"name": "Step 1 - Authenticate - Required for AISP APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Access token is present\"] = responseBody.has(\"access_token\");",
+									"",
+									"if (responseBody.has(\"access_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"bearer_token\", data.data.access_token);",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"description": "The username from the test data",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"description": "The matching password from the test data",
+									"type": "text"
+								},
+								{
+									"key": "next",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/authenticate?client_id={{client_id}}&brand={{brand}}",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"authenticate"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2 - Get authorization code - Required for AISP APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Redirect is OK\"] = postman.getResponseHeader(\"location\")",
+									"",
+									"if (postman.getResponseHeader(\"location\")) {",
+									"var loc = postman.getResponseHeader(\"location\").split('&')[0];",
+									"postman.setEnvironmentVariable(\"authorization_code\", loc.split('=')[1])",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}",
+								"description": "(optional/deprecated) Container name",
+								"disabled": true
+							},
+							{
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}",
+								"description": "(required) API version in used",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_url}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "aisp",
+									"type": "text"
+								},
+								{
+									"key": "response_type",
+									"value": "code",
+									"type": "text"
+								},
+								{
+									"key": "accounts",
+									"value": "{{from_account}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/authorize?client_id={{client_id}}&state={{state}}&brand={{brand}}",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"authorize"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "state",
+									"value": "{{state}}"
+								},
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3 - Get Token - Required for AISP APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Access token is present\"] = responseBody.has(\"access_token\");",
+									"tests[\"Refresh token is present\"] = responseBody.has(\"refresh_token\");",
+									"",
+									"if (responseBody.has(\"access_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"access_token_authorization_grant\", data.access_token);",
+									"}",
+									"",
+									"if (responseBody.has(\"refresh_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"access_token_refresh_token\", data.refresh_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}",
+								"description": "(required) Container name",
+								"disabled": true
+							},
+							{
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}",
+								"description": "(required) API version in used",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_url}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "aisp",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "{{authorization_code}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/token",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieval of the PSU accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"self ref should contain all request params\", function () {",
+									"    var data = JSON.parse(responseBody);",
+									"    var br = pm.request.url.query.get('brand');",
+									"    pm.expect(data._links.self.href).to.eql(`/psd2/v3/accounts?brand=${br}&pageSize=25&index=1`);",
+									"})",
+									"    "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_authorization_grant}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>",
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate."
+							},
+							{
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>",
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n"
+							},
+							{
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "x-openbank-scenario",
+								"value": "6d7b43d4-f713-41c1-a968-0a025805c058",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/accounts?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"accounts"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieval of an account balances",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_authorization_grant}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>",
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate."
+							},
+							{
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>",
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n"
+							},
+							{
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"description": "(optional)",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/accounts/{{accountResourceId}}EUR/balances?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"accounts",
+								"{{accountResourceId}}EUR",
+								"balances"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieval of an account transactions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is nok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_authorization_grant}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>",
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate."
+							},
+							{
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>",
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n"
+							},
+							{
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"description": "(optional)",
+								"disabled": true
+							},
+							{
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"description": "(optional)",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/accounts/{{accountResourceId}}EUR/transactions?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"accounts",
+								"{{accountResourceId}}EUR",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PAYMENT INITIATION API (PISP)",
+			"item": [
+				{
+					"name": "Step 1 - Get Token - Required for PISP APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Access token is present\"] = responseBody.has(\"access_token\");",
+									"",
+									"if (responseBody.has(\"access_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"access_token_client_credentials\", data.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_url}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "pisp",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/token",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SEPA Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))",
+									"var moment = require('moment')",
+									"pm.environment.set('timestamp', moment().format('YYYY-MM-DDTHH:mm:ssZ'))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paymentInformationId\": \"MyPmtInfId\",\n    \"creationDateTime\": \"{{timestamp}}\",\n    \"requestedExecutionDate\": \"{{timestamp}}\",\n    \"numberOfTransactions\": 1,\n    \"initiatingParty\": {\n        \"name\": \"MyPreferedPisp\",\n        \"organisationId\": {\n            \"identification\": \"12FR5\",\n            \"schemeName\": \"CPAN\",\n            \"issuer\": \"ACPR\"\n        }\n    },\n    \"paymentTypeInformation\": {\n        \"serviceLevel\": \"SEPA\"\n    },\n    \"debtor\": {\n        \"name\": \"Isaac Newton\",\n        \"privateId\": {\n            \"identification\": \"FD37G\",\n            \"schemeName\": \"BANK\",\n            \"issuer\": \"BICXYYTTZZZ\"\n        }\n    },\n    \"debtorAccount\": {\n        \"iban\": \"{{from_account}}\"\n    },\n    \"beneficiary\": {\n        \"creditor\": {\n            \"name\": \"Thomas Edison\",\n            \"postalAddress\": {\n                \"country\": \"FR\",\n                \"townName\": \"Paris\"\n            },\n            \"organisationId\": {\n                \"identification\": \"852126789\",\n                \"schemeName\": \"SREN\",\n                \"issuer\": \"FR\"\n            }\n        },\n        \"creditorAccount\": {\n            \"iban\": \"{{to_account}}\"\n        }\n    },\n    \"creditTransferTransaction\": [\n        {\n            \"paymentId\": {\n                \"instructionId\": \"MyInstrId\",\n                \"endToEndId\": \"MyEndToEndId\"\n            },\n            \"instructedAmount\": {\n                \"currency\": \"EUR\",\n                \"amount\": \"1.50\"\n            },\n            \"remittanceInformation\": {\n                \"structured\": [\n                    {\n                        \"creditorReferenceInformation\": {\n                            \"type\": {\n                                \"code\": \"SCOR\",\n                                \"issuer\": \"BBA\"\n                            },\n                            \"reference\": \"123456789123\"\n                        }\n                    }\n                ]\n            }\n        }\n    ],\n    \"supplementaryData\": {\n        \"acceptedAuthenticationApproach\": [\n            \"REDIRECT\"\n        ],\n        \"successfulReportUrl\": \"{{redirect_uri}}\",\n        \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "International Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"var payload = JSON.parse(request.data);",
+									"postman.setEnvironmentVariable(\"requestedExecutionDate\", payload.requestedExecutionDate);",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var randomBBAN = '' + _.random(10000000000000, 99999999999999)",
+									"var randomIBAN = 'BG' + randomBBAN",
+									"pm.environment.set(\"randomBBAN\", randomBBAN)",
+									"pm.environment.set(\"randomIBAN\", randomIBAN)",
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))",
+									"var moment = require('moment')",
+									"pm.environment.set('timestamp', moment().format('YYYY-MM-DDTHH:mm:ssZ'))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paymentInformationId\": \"MyPmtInfId\",\n    \"creationDateTime\": \"{{timestamp}}\",\n    \"requestedExecutionDate\": \"{{timestamp}}\",\n    \"numberOfTransactions\": 1,\n    \"initiatingParty\": {\n        \"name\": \"MyPreferedPisp\",\n        \"organisationId\": {\n            \"identification\": \"12FR5\",\n            \"schemeName\": \"CPAN\",\n            \"issuer\": \"ACPR\"\n        }\n    },\n    \"paymentTypeInformation\": {},\n    \"debtor\": {\n        \"name\": \"Isaac Newton\",\n        \"privateId\": {\n            \"identification\": \"FD37G\",\n            \"schemeName\": \"BANK\",\n            \"issuer\": \"BICXYYTTZZZ\"\n        }\n    },\n    \"debtorAccount\": {\n        \"iban\": \"{{from_account}}\",\n        \"currency\": \"EUR\"\n    },\n    \"beneficiary\": {\n        \"creditor\": {\n            \"name\": \"Thomas Edison\",\n            \"postalAddress\": {\n                \"country\": \"FR\",\n                \"townName\": \"Paris\"\n            },\n            \"organisationId\": {\n                \"identification\": \"852126789\",\n                \"schemeName\": \"SREN\",\n                \"issuer\": \"FR\"\n            }\n        },\n        \"creditorAccount\": {\n            \"other\": {\n                \"identification\": \"{{randomBBAN}}\",\n                \"schemeName\": \"BBAN\"\n            }\n        },\n        \"creditorAgent\": {\n            \"name\": \"BNP\",\n            \"postalAddress\": {\n                \"country\": \"BE\",\n                \"townName\": \"Brussels\"\n            }\n        }\n    },\n    \"creditTransferTransaction\": [\n        {\n            \"paymentId\": {\n                \"instructionId\": \"MyInstrId\",\n                \"endToEndId\": \"MyEndToEndId\"\n            },\n            \"instructedAmount\": {\n                \"currency\": \"USD\",\n                \"amount\": \"1.50\"\n            },\n            \"remittanceInformation\": {\n                \"structured\": [\n                    {\n                        \"creditorReferenceInformation\": {\n                            \"type\": {\n                                \"code\": \"SCOR\",\n                                \"issuer\": \"BBA\"\n                            },\n                            \"reference\": \"123456789123\"\n                        }\n                    }\n                ]\n            }\n        }\n    ],\n    \"supplementaryData\": {\n        \"acceptedAuthenticationApproach\": [\n            \"REDIRECT\"\n        ],\n        \"successfulReportUrl\": \"{{redirect_uri}}\",\n        \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Future Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = !!postman.getResponseHeader(\"location\")",
+									"",
+									"var data = postman.getResponseHeader(\"location\")",
+									"console.log('location = ' , data)",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"var payload = JSON.parse(request.data);",
+									"postman.setEnvironmentVariable(\"requestedExecutionDate\", payload.requestedExecutionDate);",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"pm.environment.set('timestamp', moment().format('YYYY-MM-DDTHH:mm:ssZ'))",
+									"pm.environment.set(\"nextWeek\", moment().add(1, 'week').format('YYYY-MM-DDTHH:mm:ssZ'))",
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) Container name",
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}"
+							},
+							{
+								"description": "(required) API version in used",
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}"
+							},
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentInformationId\": \"MyPmtInfId\",\n    \"creationDateTime\": \"{{timestamp}}\",\n    \"requestedExecutionDate\": \"{{nextWeek}}\",\n  \"numberOfTransactions\": 1,\n  \"initiatingParty\": {\n    \"name\": \"MyPreferedPisp\",\n    \"organisationId\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"CPAN\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"paymentTypeInformation\": {\n    \"serviceLevel\": \"SEPA\"\n  },\n  \"debtor\": {\n    \"name\": \"Isaac Newton\",\n    \"privateId\": {\n      \"identification\": \"FD37G\",\n      \"schemeName\": \"BANK\",\n      \"issuer\": \"BICXYYTTZZZ\"\n    }\n  },\n  \"debtorAccount\": {\n  \t\"iban\": \"{{from_account}}\"\n  },\n  \"beneficiary\": {\n    \"creditor\": {\n      \"name\": \"Thomas Edison\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      },\n      \"organisationId\": {\n        \"identification\": \"852126789\",\n        \"schemeName\": \"SREN\",\n        \"issuer\": \"FR\"\n      }\n    },\n    \"creditorAccount\": {\n      \"iban\": \"{{to_account}}\"\n    }\n  },\n  \"creditTransferTransaction\": [\n    {\n      \"paymentId\": {\n        \"instructionId\": \"MyInstrId\",\n        \"endToEndId\": \"MyEndToEndId\"\n      },\n      \"instructedAmount\": {\n        \"currency\": \"EUR\",\n        \"amount\": \"1.50\"\n      }\n    }\n  ],\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"successfulReportUrl\": \"{{redirect_uri}}\",\n    \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}\n"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Standing Order Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"var payload = JSON.parse(request.data);",
+									"postman.setEnvironmentVariable(\"requestedExecutionDate\", payload.requestedExecutionDate);",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"var reqDate = moment().add(3, 'days')",
+									"pm.environment.set('reqDate', reqDate.format('YYYY-MM-DDTHH:mm:ssZ'))",
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) Container name",
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}"
+							},
+							{
+								"description": "(required) API version in used",
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}"
+							},
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentInformationId\": \"MyPmtInfId\",\n  \"creationDateTime\": \"{{reqDate}}\",\n  \"numberOfTransactions\": 1,\n  \"initiatingParty\": {\n    \"name\": \"MyPreferedPisp\",\n    \"organisationId\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"CPAN\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"paymentTypeInformation\": {\n    \"serviceLevel\": \"SEPA\"\n  },\n  \"debtor\": {\n    \"name\": \"Isaac Newton\",\n    \"privateId\": {\n      \"identification\": \"FD37G\",\n      \"schemeName\": \"BANK\",\n      \"issuer\": \"BICXYYTTZZZ\"\n    }\n  },\n  \"debtorAccount\": {\n  \t\"iban\": \"{{from_account}}\"\n  },\n  \"beneficiary\": {\n    \"creditor\": {\n      \"name\": \"Thomas Edison\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      },\n      \"organisationId\": {\n        \"identification\": \"852126789\",\n        \"schemeName\": \"SREN\",\n        \"issuer\": \"FR\"\n      }\n    },\n    \"creditorAccount\": {\n      \"iban\": \"{{to_account}}\"\n    }\n  },\n  \"creditTransferTransaction\": [\n    {\n      \"frequency\": \"MNTH\",\n      \"dayOfExecution\": \"31\",\n      \"numberOfOccurrences\": 12,\n      \"requestedExecutionDate\": \"{{nextWeek}}\",\n      \"paymentId\": {\n        \"instructionId\": \"MyInstrId\",\n        \"endToEndId\": \"MyEndToEndId\"\n      },\n      \"instructedAmount\": {\n        \"currency\": \"EUR\",\n        \"amount\": \"2.55\"\n      },\n      \"remittanceInformation\": {\n        \"unstructured\": [\n        \t\"STO request\"\n        ]\n      }\n    }\n  ],\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"successfulReportUrl\": \"{{redirect_uri}}\",\n    \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}\n"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Standing Order with variable amount Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"var payload = JSON.parse(request.data);",
+									"postman.setEnvironmentVariable(\"requestedExecutionDate\", payload.requestedExecutionDate);",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"var reqDate = moment().add(3, 'day')",
+									"pm.environment.set('reqDate', reqDate.format('YYYY-MM-DDTHH:mm:ssZ'))",
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) Container name",
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}"
+							},
+							{
+								"description": "(required) API version in used",
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}"
+							},
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentInformationId\": \"MyPmtInfId\",\n  \"creationDateTime\": \"{{reqDate}}\",\n  \"numberOfTransactions\": 1,\n  \"initiatingParty\": {\n    \"name\": \"MyPreferedPisp\",\n    \"organisationId\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"CPAN\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"paymentTypeInformation\": {\n    \"serviceLevel\": \"SEPA\"\n  },\n  \"debtor\": {\n    \"name\": \"Isaac Newton\",\n    \"privateId\": {\n      \"identification\": \"FD37G\",\n      \"schemeName\": \"BANK\",\n      \"issuer\": \"BICXYYTTZZZ\"\n    }\n  },\n  \"debtorAccount\": {\n  \t\"iban\": \"{{from_account}}\"\n  },\n  \"beneficiary\": {\n    \"creditor\": {\n      \"name\": \"Thomas Edison\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      },\n      \"organisationId\": {\n        \"identification\": \"852126789\",\n        \"schemeName\": \"SREN\",\n        \"issuer\": \"FR\"\n      }\n    },\n    \"creditorAccount\": {\n      \"iban\": \"{{to_account}}\"\n    }\n  },\n  \"creditTransferTransaction\": [\n    {\n      \"frequency\": \"WEEK\",\n      \"dayOfExecution\": \"03\",\n      \"numberOfOccurrences\": 10,\n      \"requestedExecutionDate\": \"{{reqDate}}\",\n      \"paymentId\": {\n        \"instructionId\": \"MyInstrId\",\n        \"endToEndId\": \"MyEndToEndId\"\n      },\n      \"minimalAmount\": {\n        \"currency\": \"EUR\",\n        \"amount\": \"80.00\"\n      },\n      \"remittanceInformation\": {\n        \"unstructured\": [\n        \t\"STO variable request\"\n        ]\n      }\n    }\n  ],\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"successfulReportUrl\": \"{{redirect_uri}}\",\n    \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}\n"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Instant Payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"pm.environment.set('timestamp', moment().format('YYYY-MM-DDTHH:mm:ssZ'))",
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentInformationId\": \"MyPmtInfId\",\n  \"creationDateTime\": \"{{timestamp}}\",\n  \"requestedExecutionDate\": \"{{timestamp}}\",\n  \"numberOfTransactions\": 1,\n  \"initiatingParty\": {\n    \"name\": \"MyPreferedPisp\",\n    \"organisationId\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"CPAN\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"paymentTypeInformation\": {\n    \"serviceLevel\": \"SEPA\",\n    \"localInstrument\": \"INST\"\n  },\n  \"debtor\": {\n    \"name\": \"Isaac Newton\",\n    \"privateId\": {\n      \"identification\": \"FD37G\",\n      \"schemeName\": \"BANK\",\n      \"issuer\": \"BICXYYTTZZZ\"\n    }\n  },\n  \"debtorAccount\": {\n  \t\"iban\": \"{{from_account}}\"\n  },\n  \"beneficiary\": {\n    \"creditor\": {\n      \"name\": \"Thomas Edison\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      },\n      \"organisationId\": {\n        \"identification\": \"852126789\",\n        \"schemeName\": \"SREN\",\n        \"issuer\": \"FR\"\n      }\n    },\n    \"creditorAccount\": {\n      \"iban\": \"{{to_account}}\"\n    }\n  },\n  \"creditTransferTransaction\": [\n    {\n      \"paymentId\": {\n        \"instructionId\": \"MyInstrId\",\n        \"endToEndId\": \"MyEndToEndId\"\n      },\n      \"instructedAmount\": {\n        \"currency\": \"EUR\",\n        \"amount\": \"0.99\"\n      },\n      \"remittanceInformation\": {\n        \"unstructured\": [\n        \t\"requestedExecutionDate is set to {{today}} and localInstrument to 'INST'\"\n        ]\n      }\n    }\n  ],\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"successfulReportUrl\": \"{{redirect_uri}}\",\n    \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}\n"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieval of a payment request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}",
+								"description": "(required) Container name",
+								"disabled": true
+							},
+							{
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}",
+								"description": "(required) API version in used"
+							},
+							{
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>",
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate."
+							},
+							{
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>",
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n"
+							},
+							{
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"description": "(optional)"
+							},
+							{
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"description": "(optional)"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests/{{paymentRequestResourceId}}?brand=bnppf",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests",
+								"{{paymentRequestResourceId}}"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "bnppf"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cancellation url",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"tests[\"Received link\"] = pm.expect(data).to.have.property('_links')",
+									"tests[\"Received consentApproval link\"] = pm.expect(data._links).to.have.property('consentApproval')",
+									"tests[\"consentApproval link has cancel\"] = pm.expect(data._links.consentApproval.href).to.contain('cancel')"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"pm.environment.set('timestamp', moment().format('YYYY-MM-DDTHH:mm:ssZ'))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-Request-Id",
+								"value": "12345",
+								"type": "text"
+							},
+							{
+								"key": "Signature",
+								"value": "<signature>",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "businesslinename",
+								"value": "RPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentInformationId\": \"MyPmtInfId\",\n  \"creationDateTime\": \"{{timestamp}}\",\n  \"numberOfTransactions\": 1,\n  \"initiatingParty\": {\n    \"name\": \"MyPreferedPisp\",\n    \"organisationId\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"COID\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"paymentTypeInformation\": {\n    \"instructionPriority\": \"HIGH\",\n    \"serviceLevel\": \"SEPA\",\n    \"localInstrument\": \"INST\",\n    \"categoryPurpose\": \"SUPP\"\n  },\n  \"debtor\": {\n    \"name\": \"MyCustomer\",\n    \"organisationId\": {\n      \"identification\": \"FD37G\",\n      \"schemeName\": \"BANK\",\n      \"issuer\": \"BICXYYTTZZZ\"\n    }\n  },\n  \"debtorAccount\": {\n    \"iban\": \"{{accountResourceId}}\",\n    \"others\": {\n      \"identification\": \"12FR5\",\n      \"schemeName\": \"COID\",\n      \"issuer\": \"ACPR\"\n    }\n  },\n  \"debtorAgent\": {\n    \"bicFi\": \"GEBABEBB\",\n    \"clearingSystemMemberId\": {\n      \"clearingSystemId\": \"ABC\",\n      \"memberId\": \"ABC\"\n    },\n    \"name\": \"ABC\"\n  },\n  \"beneficiary\": {\n    \"id\": \"12234ABC\",\n    \"isTrusted\": true,\n    \"creditorAgent\": {\n      \"bicFi\": \"GEBABEBB\",\n      \"clearingSystemMemberId\": {\n        \"clearingSystemId\": \"ABC\",\n        \"memberId\": \"ABC\"\n      },\n      \"name\": \"ABC\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      }\n    },\n    \"creditor\": {\n      \"name\": \"myMerchant\",\n      \"postalAddress\": {\n        \"country\": \"FR\",\n        \"townName\": \"Paris\"\n      },\n      \"organisationId\": {\n        \"identification\": \"852126789\",\n        \"schemeName\": \"SIREN\",\n        \"issuer\": \"FR\"\n      }\n    },\n    \"creditorAccount\": {\n      \"iban\": \"BE22222222222222\",\n      \"others\": {\n        \"identification\": \"12FR5\",\n        \"schemeName\": \"COID\",\n        \"issuer\": \"ACPR\"\n      }\n    }\n  },\n  \"purpose\": \"COMC\",\n  \"chargeBearer\": \"SLEV\",\n  \"paymentInformationStatus\": \"RJCT\",\n  \"statusReasonInformation\": \"MS03\",\n  \"fundsAvailability\": true,\n  \"booking\": true,\n  \"requestedExecutionDate\": \"{{timestamp}}\",\n  \"creditTransferTransaction\": [\n    {\n      \"paymentId\": {\n        \"resourceId\": \"123abc\",\n        \"instructionId\": \"MyInstrId\",\n        \"endToEndId\": \"MyEndToEndId\"\n      },\n      \"requestedExecutionDate\": \"{{timestamp}}\",\n      \"endDate\": \"{{timestamp}}\",\n      \"executionRule\": \"FWNG\",\n      \"frequency\": \"WEEK\",\n      \"instructedAmount\": {\n        \"currency\": \"EUR\",\n        \"amount\": \"124.35\"\n      },\n      \"id\": \"12234ABC\",\n      \"beneficiary\": {\n        \"isTrusted\": true,\n        \"creditorAgent\": {\n          \"bicFi\": \"GEBABEBB\",\n          \"clearingSystemMemberId\": {\n            \"clearingSystemId\": \"ABC\",\n            \"memberId\": \"ABC\"\n          },\n          \"name\": \"ABC\",\n          \"postalAddress\": {\n            \"country\": \"FR\",\n            \"townName\": \"Paris\"\n          }\n        },\n        \"creditor\": {\n          \"name\": \"myMerchant\",\n          \"postalAddress\": {\n            \"country\": \"FR\",\n            \"townName\": \"Paris\"\n          },\n          \"organisationId\": {\n            \"identification\": \"852126789\",\n            \"schemeName\": \"SIREN\",\n            \"issuer\": \"FR\"\n          }\n        },\n        \"creditorAccount\": {\n          \"iban\": \"BE22222222222222\",\n          \"others\": {\n            \"identification\": \"12FR5\",\n            \"schemeName\": \"COID\",\n            \"issuer\": \"ACPR\"\n          }\n        }\n      },\n      \"remittanceInformation\": {\n        \"structured\": [\n          {\n            \"creditorReferenceInformation\": {\n              \"type\": {\n                \"code\": \"SCOR\",\n                \"issuer\": \"BBA\"\n              },\n              \"reference\": \"123456789123\"\n            }\n          }\n        ]\n      },\n      \"transactionStatus\": \"RJCT\",\n      \"statusReasonInformation\": \"RR12\"\n    }\n  ],\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"appliedAuthenticationApproach\": \"REDIRECT\",\n    \"scaHint\": \"noScaExemption\",\n    \"successfulReportUrl\": \"{{redirect_uri}}\",\n    \"unsuccessfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/payment-requests/{{paymentRequestResourceId}}?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"payment-requests",
+								"{{paymentRequestResourceId}}"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						},
+						"description": "In order to get the cancellation url you need to put \"RJCT\" as value for \"paymentInformationStatus\" and \"transactionStatus\" in the payload"
+					},
+					"response": []
+				},
+				{
+					"name": "PISP - File payment request initiation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"location header is present\"] = postman.getResponseHeader(\"location\") !== null",
+									"",
+									"if (postman.getResponseHeader(\"location\") !== null)",
+									"var data = postman.getResponseHeader(\"location\")",
+									"postman.setEnvironmentVariable(\"paymentRequestResourceId\", data.split('/')[4])",
+									"",
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Valid consentApproval\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('_links')",
+									"    pm.expect(responseJson._links).to.have.property('consentApproval')",
+									"    pm.expect(responseJson._links.consentApproval).to.have.property('href')",
+									"    pm.expect(responseJson._links.consentApproval.href).to.contain('redirect_uri=http://myPisp/PaymentSuccess');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment')",
+									"var reqDate = moment()",
+									"pm.environment.set('reqDate', reqDate.format())",
+									"var uuid = require('uuid')",
+									"var fromAccount = pm.environment.get('from_account')",
+									"var fileRequest = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+									"<Document xmlns=\"urn:iso:std:iso:20022:tech:xsd:pain.001.001.03\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">",
+									"   <CstmrCdtTrfInitn>",
+									"      <GrpHdr>",
+									"         <MsgId>`+ uuid.v4().replace('-', '') + `</MsgId>",
+									"         <CreDtTm>`+ reqDate.format() + `</CreDtTm>",
+									"         <NbOfTxs>2</NbOfTxs>",
+									"         <InitgPty>",
+									"            <Nm>Cake</Nm>",
+									"            <Id>",
+									"               <OrgId>",
+									"                  <Othr>",
+									"                     <Id>0832581187</Id>",
+									"                     <Issr>KBO-BCE</Issr>",
+									"                  </Othr>",
+									"               </OrgId>",
+									"            </Id>",
+									"         </InitgPty>",
+									"      </GrpHdr>",
+									"      <PmtInf>",
+									"         <PmtInfId>PaymentInfoBlock1</PmtInfId>",
+									"         <PmtMtd>TRF</PmtMtd>",
+									"         <BtchBookg>false</BtchBookg>",
+									"         <PmtTpInf>",
+									"            <InstrPrty>NORM</InstrPrty>",
+									"            <SvcLvl>",
+									"               <Cd>SEPA</Cd>",
+									"            </SvcLvl>",
+									"         </PmtTpInf>",
+									"         <ReqdExctnDt>`+ reqDate.format('YYYY-MM-DD') + `</ReqdExctnDt>",
+									"         <Dbtr>",
+									"            <Nm>Cake</Nm>",
+									"            <PstlAdr>",
+									"               <Ctry>BE</Ctry>",
+									"               <AdrLine>Warandeberg 3</AdrLine>",
+									"               <AdrLine>1000 Brussel</AdrLine>",
+									"            </PstlAdr>",
+									"         </Dbtr>",
+									"         <DbtrAcct>",
+									"            <Id>",
+									"               <IBAN>`+ fromAccount + `</IBAN>",
+									"            </Id>",
+									"            <Ccy>EUR</Ccy>",
+									"         </DbtrAcct>",
+									"         <DbtrAgt>",
+									"            <FinInstnId>",
+									"               <BIC>GEBABEBB</BIC>",
+									"            </FinInstnId>",
+									"         </DbtrAgt>",
+									"         <ChrgBr>SLEV</ChrgBr>",
+									"         <CdtTrfTxInf>",
+									"            <PmtId>",
+									"               <EndToEndId>Test20210901104534</EndToEndId>",
+									"            </PmtId>",
+									"            <Amt>",
+									"               <InstdAmt Ccy=\"EUR\">22.26</InstdAmt>",
+									"            </Amt>",
+									"            <CdtrAgt>",
+									"               <FinInstnId>",
+									"                  <BIC>KREDBEBB</BIC>",
+									"               </FinInstnId>",
+									"            </CdtrAgt>",
+									"            <Cdtr>",
+									"               <Nm>benef name 1</Nm>",
+									"               <PstlAdr>",
+									"                  <Ctry>BE</Ctry>",
+									"                  <AdrLine>Wetstraat 16</AdrLine>",
+									"                  <AdrLine>1000 Brussel</AdrLine>",
+									"               </PstlAdr>",
+									"            </Cdtr>",
+									"            <CdtrAcct>",
+									"               <Id>",
+									"                  <IBAN>BE80427743429777</IBAN>",
+									"               </Id>",
+									"            </CdtrAcct>",
+									"            <RmtInf>",
+									"               <Ustrd>NORMAL SEPA PAYMENT TO BE</Ustrd>",
+									"            </RmtInf>",
+									"         </CdtTrfTxInf>",
+									"      </PmtInf>",
+									"      <PmtInf>",
+									"         <PmtInfId>PaymentInfoBlock2</PmtInfId>",
+									"         <PmtMtd>TRF</PmtMtd>",
+									"         <BtchBookg>false</BtchBookg>",
+									"         <PmtTpInf>",
+									"            <InstrPrty>NORM</InstrPrty>",
+									"            <SvcLvl>",
+									"               <Cd>SEPA</Cd>",
+									"            </SvcLvl>",
+									"         </PmtTpInf>",
+									"         <ReqdExctnDt>`+ reqDate.format('YYYY-MM-DD') + `</ReqdExctnDt>",
+									"         <Dbtr>",
+									"            <Nm>Cake</Nm>",
+									"            <PstlAdr>",
+									"               <Ctry>BE</Ctry>",
+									"               <AdrLine>Warandeberg 3</AdrLine>",
+									"               <AdrLine>1000 Brussel</AdrLine>",
+									"            </PstlAdr>",
+									"         </Dbtr>",
+									"         <DbtrAcct>",
+									"            <Id>",
+									"               <IBAN>`+ fromAccount + `</IBAN>",
+									"            </Id>",
+									"            <Ccy>EUR</Ccy>",
+									"         </DbtrAcct>",
+									"         <DbtrAgt>",
+									"            <FinInstnId>",
+									"               <BIC>GEBABEBB</BIC>",
+									"            </FinInstnId>",
+									"         </DbtrAgt>",
+									"         <ChrgBr>SLEV</ChrgBr>",
+									"         <CdtTrfTxInf>",
+									"            <PmtId>",
+									"               <EndToEndId>Test20210901104534</EndToEndId>",
+									"            </PmtId>",
+									"            <Amt>",
+									"               <InstdAmt Ccy=\"EUR\">10.10</InstdAmt>",
+									"            </Amt>",
+									"            <CdtrAgt>",
+									"               <FinInstnId>",
+									"                  <BIC>BBRUBEBB</BIC>",
+									"               </FinInstnId>",
+									"            </CdtrAgt>",
+									"            <Cdtr>",
+									"               <Nm>benef name 2</Nm>",
+									"               <PstlAdr>",
+									"                  <Ctry>BE</Ctry>",
+									"                  <AdrLine>Wetstraat 16</AdrLine>",
+									"                  <AdrLine>1000 Brussel</AdrLine>",
+									"               </PstlAdr>",
+									"            </Cdtr>",
+									"            <CdtrAcct>",
+									"               <Id>",
+									"                  <IBAN>BE04382240434131</IBAN>",
+									"               </Id>",
+									"            </CdtrAcct>",
+									"            <RmtInf>",
+									"               <Ustrd>NORMAL SEPA PAYMENT TO BE</Ustrd>",
+									"            </RmtInf>",
+									"         </CdtTrfTxInf>",
+									"      </PmtInf>",
+									"   </CstmrCdtTrfInitn>",
+									"</Document>`",
+									"pm.environment.set('encodedFileRequest', btoa(fileRequest))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) Container name",
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}"
+							},
+							{
+								"description": "(required) API version in used",
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}"
+							},
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "businesslinename",
+								"value": "CPB",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"requestedExecutionDate\": \"{{timestamp}}\",\n  \"fileName\": \"this-is-a-test.xml\",\n  \"fileContent\": \"{{encodedFileRequest}}\",\n  \"fileType\": \"XML\",\n  \"supplementaryData\": {\n    \"acceptedAuthenticationApproach\": [\n      \"REDIRECT\"\n    ],\n    \"successfulReportUrl\": \"{{redirect_uri}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/file-payment-requests?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"file-payment-requests"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieval of a file payment request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"File payment request accepted\", function () {",
+									"    var data = JSON.parse(responseBody);",
+									"    pm.expect(data.paymentInformationStatus).to.eql(\"ACCP\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_client_credentials}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"description": "(required) Container name",
+								"key": "X-Openbank-Organization",
+								"value": "{{org_container_name}}",
+								"disabled": true
+							},
+							{
+								"description": "(required) API version in used",
+								"key": "X-Openbank-Stet-Version",
+								"value": "{{api_version}}"
+							},
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/file-payment-requests/{{paymentRequestResourceId}}?brand=bnppf",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"file-payment-requests",
+								"{{paymentRequestResourceId}}"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "bnppf"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CHECK AVAILABILITY OF FUNDS (CBPI)",
+			"item": [
+				{
+					"name": "Step 1 - Authenticate - Required for CBPI APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Access token is present\"] = responseBody.has(\"access_token\");",
+									"",
+									"if (responseBody.has(\"access_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"bearer_token\", data.data.access_token);",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"description": "The username from the test data",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"description": "The matching password from the test data",
+									"type": "text"
+								},
+								{
+									"key": "next",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/authenticate?client_id={{client_id}}&brand={{brand}}",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"authenticate"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2 - Get authorization code - Required for CBPI APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Redirect is OK\"] = postman.getResponseHeader(\"location\")",
+									"",
+									"if (postman.getResponseHeader(\"location\")) {",
+									"var loc = postman.getResponseHeader(\"location\").split('&')[0];",
+									"postman.setEnvironmentVariable(\"authorization_code\", loc.split('=')[1])",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_url}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "cbpi",
+									"type": "text"
+								},
+								{
+									"key": "response_type",
+									"value": "code",
+									"type": "text"
+								},
+								{
+									"key": "accounts",
+									"value": "{{accountResourceId}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/authorize?client_id={{client_id}}&state={{state}}&brand={{brand}}",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"authorize"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "state",
+									"value": "{{state}}"
+								},
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3 - Get Token - Required for CBPI APIs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Access token is present\"] = responseBody.has(\"access_token\");",
+									"tests[\"Refresh token is present\"] = responseBody.has(\"refresh_token\");",
+									"",
+									"if (responseBody.has(\"access_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"access_token_authorization_grant\", data.access_token);",
+									"}",
+									"",
+									"if (responseBody.has(\"refresh_token\")) {",
+									"    var data = JSON.parse(responseBody);",
+									"    postman.setEnvironmentVariable(\"access_token_refresh_token\", data.refresh_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_url}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "cbpi",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "{{authorization_code}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sandbox_auth}}/token",
+							"host": [
+								"{{sandbox_auth}}"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment coverage check request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('from_account', pm.environment.get('accountResourceId').replace('EUR', ''))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{access_token_authorization_grant}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"description": "(required) http-signature of the request (cf. https://datatracker.ietf.org/doc/draft-cavage-http-signatures/) The keyId must specify the way to get the relevant qualified certificate. It is requested that this identifier is an URL aiming to provide the relevant Qualified Certificate.",
+								"key": "Signature",
+								"value": "<Base64(RSA-SHA256(signing string))>"
+							},
+							{
+								"description": "(required) Correlation header to be set in a request and retrieved in the relevant response\n",
+								"key": "X-Request-ID",
+								"value": "<X-Request-ID>"
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Address",
+								"value": "<PSU-IP-Address>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-IP-Port",
+								"value": "<PSU-IP-Port>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-HTTP-Method",
+								"value": "<PSU-HTTP-Method>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Date",
+								"value": "<PSU-Date>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-GEO-Location",
+								"value": "<PSU-GEO-Location>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-User-Agent",
+								"value": "<PSU-User-Agent>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Referer",
+								"value": "<PSU-Referer>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept",
+								"value": "<PSU-Accept>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Charset",
+								"value": "<PSU-Accept-Charset>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Encoding",
+								"value": "<PSU-Accept-Encoding>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Accept-Language",
+								"value": "<PSU-Accept-Language>",
+								"disabled": true
+							},
+							{
+								"description": "(optional)",
+								"key": "PSU-Device-ID",
+								"value": "<PSU-Device-ID>",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentCoverageRequestId\": \"MyCoverage123456\",\n  \"instructedAmount\": {\n    \"currency\": \"EUR\",\n    \"amount\": \"20\"\n  },\n  \"accountId\": {\n  \t\"currency\": \"EUR\",\n    \"iban\": \"{{accountResourceId}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{sandbox_gateway}}/psd2/v4/funds-confirmations?brand={{brand}}",
+							"host": [
+								"{{sandbox_gateway}}"
+							],
+							"path": [
+								"psd2",
+								"v4",
+								"funds-confirmations"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "{{brand}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
