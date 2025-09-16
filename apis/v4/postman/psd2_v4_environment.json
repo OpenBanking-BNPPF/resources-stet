@@ -1,0 +1,151 @@
+{
+  "id": "cb512a59-d31a-464a-ace2-434cae26aeaa",
+  "name": "psd2_v4_ENVIRONMENTS",
+  "values": [
+    {
+      "key": "username",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "password",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "sandbox_auth",
+      "value": "https://sandbox.auth.bnpparibasfortis.com",
+      "enabled": true
+    },
+    {
+      "key": "client_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "brand",
+      "value": "bnppf",
+      "enabled": true
+    },
+    {
+      "key": "bearer_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "org_container_name",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "api_version",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "redirect_url",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "from_account",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "state",
+      "value": "1234567",
+      "enabled": true
+    },
+    {
+      "key": "client_secret",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "authorization_code",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "access_token_authorization_grant",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "sandbox_gateway",
+      "value": "https://sandbox.api.bnpparibasfortis.com",
+      "enabled": true
+    },
+    {
+      "key": "accountResourceId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "access_token_client_credentials",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "timestamp",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "to_account",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "redirect_uri",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "randomBBAN",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "nextWeek",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "reqDate",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "today",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "paymentRequestResourceId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "encodedFileRequest",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "sandbox_openbanking",
+      "value": "https://sandbox.openbankingapi.bnpparibasfortis.com",
+      "enabled": true
+    },
+    {
+      "key": "pageNumber",
+      "value": "1",
+      "enabled": true
+    },
+    {
+      "key": "cardResourceId",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}
